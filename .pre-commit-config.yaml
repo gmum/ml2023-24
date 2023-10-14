@@ -1,0 +1,45 @@
+# This should not be necessary, except that `conda<4.11` has a bug dealing with `python>=3.10`
+# (see https://github.com/conda/conda/issues/10969), and the below makes that go away.
+default_language_version:
+  python: python3
+
+repos:
+  # Generally useful pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0  # Use the ref you want to point at
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  # for .py files
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        name: "black"
+        args: [ "--config=pyproject.toml" ]
+
+  # for .py files
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.2.0
+    hooks:
+      - id: mypy
+        name: "mypy"
+        args: [ "--install-types", "--non-interactive" ]
+
+  # For notebooks
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.5.0
+    hooks:
+      - id: nbqa-black
+      - id: nbqa-isort
+        args: [ "--float-to-top" ]
+      - id: nbqa-mypy

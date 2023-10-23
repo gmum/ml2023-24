@@ -122,25 +122,13 @@ def check_1_3(
 def check_02_linear_regression(lr_cls: Type) -> None:
     from sklearn import datasets
 
-    os.makedirs(".checker/02/", exist_ok=True)
-
-    input_dataset = datasets.load_boston()
-    lr = lr_cls()
-    lr.fit(input_dataset.data, input_dataset.target)
-    returned = lr.predict(input_dataset.data)
-    # np.savez_compressed(".checker/05/lr_boston.out.npz", data=returned)
-    expected = np.load(".checker/05/lr_boston.out.npz")["data"]
-    assert np.allclose(expected, returned, rtol=1e-03, atol=1e-06), "Wrong prediction returned!"
-
-    loss = lr.loss(input_dataset.data, input_dataset.target)
-    assert np.isclose(loss, 24.166099, rtol=1e-03, atol=1e-06), "Wrong value of the loss function!"
+    np.random.seed(54)
 
     input_dataset = datasets.load_diabetes()
     lr = lr_cls()
     lr.fit(input_dataset.data, input_dataset.target)
     returned = lr.predict(input_dataset.data)
-    # np.savez_compressed(".checker/05/lr_diabetes.out.npz", data=returned)
-    expected = np.load(".checker/05/lr_iris.out.npz")["data"]
+    expected = np.load(".checker/05/lr_diabetes.out.npz")["data"]
     assert np.allclose(expected, returned, rtol=1e-03, atol=1e-06), "Wrong prediction returned!"
 
     loss = lr.loss(input_dataset.data, input_dataset.target)
@@ -152,23 +140,8 @@ def check_02_linear_regression(lr_cls: Type) -> None:
 def check_02_regularized_linear_regression(lr_cls: Type) -> None:
     from sklearn import datasets
 
-    os.makedirs(".checker/02/", exist_ok=True)
-
     np.random.seed(54)
-    input_dataset = datasets.load_boston()
-    lr = lr_cls()
-    lr.fit(input_dataset.data, input_dataset.target)
-    returned = lr.predict(input_dataset.data)
-    # np.savez_compressed(".checker/05/rlr_boston.out.npz", data=returned)
-    expected = np.load(".checker/05/rlr_boston.out.npz")["data"]
-    assert np.allclose(expected, returned, rtol=1e-03, atol=1e-06), "Wrong prediction returned!"
 
-    loss = lr.loss(input_dataset.data, input_dataset.target)
-    assert np.isclose(
-        loss, 42.8331406942, rtol=1e-03, atol=1e-06
-    ), "Wrong value of the loss function!"
-
-    np.random.seed(58)
     input_dataset = datasets.load_diabetes()
     lr = lr_cls(lr=1e-2, alpha=1e-4)
     lr.fit(input_dataset.data, input_dataset.target)

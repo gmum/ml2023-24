@@ -182,8 +182,7 @@ def check_4_1_lin_reg(fn: Callable, data: List[np.ndarray]) -> None:
 
 def check_4_1_reg_reg(fn: Callable, data: List[np.ndarray]) -> None:
     X, y, w = data
-    print(fn(X, w, y))
-    # assert torch.allclose(fn(X, w, y), torch.tensor(100910.8672)), "Wrong loss returned!"
+    assert torch.allclose(fn(X, w, y), torch.tensor(29073.4551)), "Wrong loss returned!"
 
 
 def check_04_logistic_reg(lr_cls: Type) -> None:

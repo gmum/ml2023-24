@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>24_0_Regularyzacja</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>00_Select_convolutional_model</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7476,392 +7476,170 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2a7e3b96-727d-4dce-9734-40287ca08bd9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="MUM-2023-24-Regularyzacja">MUM 2023-24 Regularyzacja<a class="anchor-link" href="#MUM-2023-24-Regularyzacja">¶</a></h1>
+<h1 id="MUM-2023-24-Wyb%C3%B3r-optymalnego-modelu-konwolucyjnego">MUM 2023-24 Wybór optymalnego modelu konwolucyjnego<a class="anchor-link" href="#MUM-2023-24-Wyb%C3%B3r-optymalnego-modelu-konwolucyjnego">¶</a></h1>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a2220ad7-e00d-469d-9ac8-7ba53417b562">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Problem-i-cel">Problem i cel<a class="anchor-link" href="#Problem-i-cel">¶</a></h2><ul>
-<li>model jest budowany z wykorzystaniem dostępnych danych<ul>
-<li>dostępnych danych jest zwykle zbyt mało i budowa modelu z reguły prowadzi do jednego z dwóch problemów<ul>
-<li><strong>underfitting</strong> gdy model zbytnio uogólnia</li>
-<li><strong>overfitting</strong> gdy model jest zbyt szczegółowy i zbyt dokładnie dopasowuje się do dostępnych danych <a href="./23_Overfitting.ipynb">overfitting</a></li>
+<h2 id="r%C3%B3%C5%BCne-w%C5%82asno%C5%9Bci">różne własności<a class="anchor-link" href="#r%C3%B3%C5%BCne-w%C5%82asno%C5%9Bci">¶</a></h2><ul>
+<li>modele konwolucyjne wprowadziły wiele nowych rozwiązań<ul>
+<li>AlexNet dał bardzo głębokie modele o powtarzających sie strukturach</li>
+<li>VGG utworzył bloki</li>
+<li>w VGG także powstały popularne konwolucje 3x3 pozwalające na przetwarzanie w strumieniu o tej samej szerokości (przy dodaniu minimalnego paddingu)</li>
+<li>konwolucje 1x1 w Network-in-network dla zwiększenia czy dopasowania wymiarowości</li>
+<li>GoogleLeNet dał przetwarzanie w wielu rozgałęzieniach dla "automatycznego" dopasowania wymiaru konwolucji do problemu na danym poziomie</li>
+<li>ResNet, jako potomek Highway, pozwolił na wykorzystanie uczenia przez poprawę residuum, a stąd budowę bardzo głębokich sieci<ul>
+<li>Highway wciąż wykorzystywał aktywację sigmoidalną mimo, że ReLU powstało właśnie w tamtym ośrodku (Schmidhuber et al., patrz vanishing gradient, LSTM)!</li>
 </ul>
 </li>
-<li>regularyzacja powinna poprawić <strong>wynik na zbiorze testowym</strong>, często kosztem danych treningowych</li>
+<li>ResNeXt dodał pogrupowane konwolucje, optymalizując obliczenia przy tej samej liczbie parametrów (trade-off)</li>
+<li><a href="">SqueezeAndExcitation</a> łączy informacje o kanałach z całego obszaru jako dodatkową wiedzę dla klasyfikacji</li>
+</ul>
+</li>
+<li>wszystkie wymagają dobrego zaprojektowania modelu dla problemu<ul>
+<li><strong>manualne</strong> zaprojektowanie: AlexNet, VGG, Iception, ResNet, ResNeXt, DenseNet, MobileNet</li>
+<li><strong>zautomatyzowane</strong>: poszukiwanie optymalnego rozwiązania w dobrze zaprojektowanej przestrzeni rozwiązań</li>
+<li><strong>skalowanie</strong> przez modyfikację kilku parametrów (głębokość, szerokość, rozdzielczość) znalezionego skutecznego modelu dla danego problemu do rozwiązania</li>
+<li><strong>porównywanie</strong> rozwiązań</li>
+</ul>
+</li>
+<li>jak znaleźć model <strong>automatycznie</strong>?<ul>
+<li>metody <em>siłowe</em> przez szukanie optymalnych parametrów są bardzo kosztowne niczego nie gwarantując</li>
 </ul>
 </li>
 </ul>
-<img alt="No description has been provided for this image" src="ml_figures/function-space-reduction.png" style="float: right;" width="450"/>
-<ul>
-<li>regularyzacja może być<ul>
-<li>dodaniem pewnej wiedzy wstępnej <em>a priori</em> do modelu przez użycie założonego rozkładu parametrów<ul>
-<li>to ogranicza <strong>pojemność modelu</strong> jednocześnie ograniczając overfitting</li>
-</ul>
-</li>
-<li>ograniczeniem przestrzeni funkcji, np. ograniczenie użytych wykładników w aproksymacji wielomianowej</li>
-<li>dowolną modyfikacją uczenia poprawiającą generalizację kosztem błędu uczenia (Ian Goodfellow)</li>
-</ul>
-</li>
-<li>generalnie regularyzacja jest związana z ograniczeniem liczby parametrów<ul>
-<li>miary AIC (Akaike) i BIC (Bayesian) Information Criterion</li>
-</ul>
-</li>
-</ul>
-<h4 id="uwaga">uwaga<a class="anchor-link" href="#uwaga">¶</a></h4><ol>
-<li>regularyzacja modyfikuje funkcję kosztu <strong>tylko na zbiorze treningowym</strong></li>
-<li>na <strong>zbiorze testowym</strong> sprawdzamy <strong>oryginalną funkcję kosztu</strong> (i ew. inne metryki, np. accuracy)</li>
-</ol>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8df9ad61-23b9-4010-9db4-558b102ded54">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Najpopularniejsze-modele-regularyzacji">Najpopularniejsze modele regularyzacji<a class="anchor-link" href="#Najpopularniejsze-modele-regularyzacji">¶</a></h2><ul>
-<li>weight decay</li>
-<li>early stopping</li>
-<li>dropout</li>
-<li>batch normalization</li>
+<h2 id="Projektowanie-przestrzeni-rozwi%C4%85za%C5%84-%5BRadosavovic,-Kosaraju,-Girshick,-He,-Dollar,-2020%5D">Projektowanie przestrzeni rozwiązań <a href="https://openaccess.thecvf.com/content_CVPR_2020/papers/Radosavovic_Designing_Network_Design_Spaces_CVPR_2020_paper.pdf">[Radosavovic, Kosaraju, Girshick, He, Dollar, 2020]</a><a class="anchor-link" href="#Projektowanie-przestrzeni-rozwi%C4%85za%C5%84-%5BRadosavovic,-Kosaraju,-Girshick,-He,-Dollar,-2020%5D">¶</a></h2><img alt="No description has been provided for this image" src="ml_figures/anynet-sample.png" style="float: right;" width="500"/>
+<ul>
+<li>zwykle szukamy <strong>jednej</strong> sieci dla <strong>jednego</strong> zadania<ul>
+<li>duża populacja modeli by obserwować ich zachowanie</li>
+<li>można samplować modele z tej przestrzeni dla porównania jakości przestrzeni projektowania (design space)<ul>
+<li>samplujemy przestrzeń i patrzymy na rozkład błędu</li>
+<li>zacząć na prostych zadaniach dla małej liczby epok znajdując rozkład od błędu (pierwszy po lewej)</li>
+<li>oraz zależności względem różnych parametrów</li>
+<li>można wykorzystać <strong>bootstrap</strong> dla lepszej dokładności w interesujących przedziałach</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>konieczny jest <strong>wzorzec</strong> sieci: niech składa się z<ul>
+<li><strong>korzenia</strong> (<em>stem</em>) dla wstępnego przetwarzania wejścia (większe konwolucje, etc.)</li>
+<li><strong>ciała</strong> (<em>body</em>) dla właściwego przetwarzania<ul>
+<li>ciało składa się z <strong>etapów</strong>, a każdy z nich z <strong>bloków</strong> odpowiadających blokom modeli konwolucyjnych</li>
+<li>zwykle każdy z tych etapów zmniejsza wymiar (także korzeń)</li>
+</ul>
+</li>
+<li><strong>głowy</strong> (<em>head</em>) która zamienia wyniki na interpretowalne wyjście, np. przez softamx</li>
+</ul>
+</li>
+</ul>
+<img alt="No description has been provided for this image" src="ml_figures/regnet.png" style="float: left;" width="460"/>
+<ul>
+<li><p>niech problemem będzie ImageNet (224x224x3 -&gt; $r=224, c=3$</p>
+<ul>
+<li>stem zmniejsza wymiar do r/2 x r/2</li>
+<li>body składa się z 4 etapów z których każdy zmniejsza wymiar dwukrotnie<ul>
+<li>każdy etap składa się z bloków<ul>
+<li>tutaj typu ResNeXt</li>
+</ul>
+</li>
+<li>to daje w końcu $r/32 = 7$</li>
+</ul>
+</li>
+<li>head wykorzystuje average pooling, dający efekt podobny do NiN,<ul>
+<li>na końcu dodatkowa warstwa fully-connected FC zwracająca n-elementowy wektor klasyfikacji</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>wciąż można ustawić wiele parametrów</p>
+<ul>
+<li>szerokość, liczbę bloków w etapie, przewężenia w blokach (bottleneck, patrz ResNeXt)</li>
+<li>to daje kilkanaście hiperparametrów dla przeszukiwania przestrzeni rozwiązań</li>
+<li>liczba możliwych modeli jest rzędu $10^{18}$ (dla pewnego układu parametrów bloków ResNeXt)</li>
+</ul>
+</li>
+<li><p>dla znalezienia <em>sensownych</em> modeli samplujemy log-uniform dla</p>
+<ul>
+<li>łącznej liczby bloków $d_i\leq16$</li>
+<li>szerokości bloków $w_i\leq1024$, podzielnych przez 8</li>
+<li>stosunku bottleneck $b_i\in\{1,2,4\}$</li>
+<li>liczby grup $g_i\in\{1,2,\dots,32\}$</li>
+</ul>
+</li>
+<li><p>samplujemy $n$ modeli, np. 500, i uczymy niedużą liczbę epok, np. 10</p>
+</li>
+<li><p>w ten sposób estymujemy rozkład $p$, dla którego modele osiągają najniższy błąd</p>
+<ul>
+<li>rozkład gęstości $$F(e,p)=P_{net\sim{}p}\{e(net)&lt;e\}$$ błędu $e$ dla modeli z rozkładu $p$</li>
+<li>stąd empiryczny rozkład $$\hat{F}(e,Z)=\dfrac{1}{n}\sum_{i=1}^n\mathbb{1}(e_i&lt;e)$$ wszystkich modeli $net_i$ z błędem $e_i$ z próbki $Z=\{net_1,\dots,net_n\}$
+<img alt="No description has been provided for this image" src="ml_figures/anynet-search.png" style="float: right;" width="400"/></li>
+</ul>
+</li>
+<li><p>kiedykolwiek wartość dla jednej próbki jest lepsza (majoryzuje) od innej, to parametry dla niej są lepsze</p>
+<ul>
+<li>jeśli ustalić jeden z parametrów wspólny dla wszystkich sieci, to próbkowanie prawie natychmiast wybiera tylko kilka sensownych wartości tego parametru</li>
+<li>lepsze wartości pozwalają na wejście do zawężonej przestrzeni parametrów, gdzie skuteczność modeli jest lepsza</li>
+</ul>
+</li>
+<li><p>takie postępowanie pozwala stosunkowo szybko wybrać kilkadziesiąt, dających podobny minimalny błąd, modeli</p>
+</li>
 </ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=61699dd6-0304-4878-8f9c-59bee5fe01ea">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Podej%C5%9Bcia-do-uczenia">Podejścia do uczenia<a class="anchor-link" href="#Podej%C5%9Bcia-do-uczenia">¶</a></h2><ul>
-<li>podstawy do podejść do uczenia w notebooku <a href="./stat_04_Twierdzenie_Bayesa.ipynb">MLE i MAP</a></li>
-</ul>
-<h3 id="Uczenie-Maximum-Likelihood-Estimator-(MLE)">Uczenie Maximum Likelihood Estimator (MLE)<a class="anchor-link" href="#Uczenie-Maximum-Likelihood-Estimator-(MLE)">¶</a></h3><ul>
-<li>Szukamy takiego $w_\ast$, które zmaksymalizuje wartość liczbową likelihoodu:
-$$w_\ast = \underset{w}{\arg\max}\;p\,(D_{Tr}\mid{}w)$$<ul>
-<li>$w$ jest zestawem parametrów odpowiadającym przyjętej hipotezie</li>
-<li>MLE szuka najlepszych parametrów z obserwowanych przykładów</li>
-<li>w MLE funkcja kosztu estymuje jak rozkład predykcji modelu odpowiada rozkładowi danych uczących</li>
-<li>MLE jest <strong>spójny</strong>: wraz ze wzrostem liczby przykładów uczących poprawia się estymacja parametrów modelu</li>
+<h3 id="RegNet">RegNet<a class="anchor-link" href="#RegNet">¶</a></h3><ul>
+<li>to daje kilkadziesiąt modeli definiujących nową przestrzeń rozwiązań, na przykład (przykładowe rozwiązanie z pracy dla ImageNet)<ul>
+<li>ten sam współczynnik bottleneck $b_i=b$</li>
+<li>ta sama liczba grup w blokach ResNeXt $g_i=g$</li>
+<li>zwiększenie szerokości w blokach ResNeXt $w_i\leq{}w_{i+1}$</li>
+<li>zwiększenie głębokości w blokach ResNeXt $d_i\leq{}d_{i+1}$</li>
 </ul>
 </li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Uczenie-Maximum-a-Posteriori-(MAP)">Uczenie Maximum a Posteriori (MAP)<a class="anchor-link" href="#Uczenie-Maximum-a-Posteriori-(MAP)">¶</a></h3><ol>
-<li>$w$ - wektor wszystkich parametrów modelu</li>
-<li>$L_{MLE}$ - funkcja kosztu negative mean log likelihood (z dokładnością do stałych)</li>
-<li>$L_{MAP}$ - funkcja kosztu <strong>negative mean log posterior</strong> (z dokładnością do stałych)</li>
-</ol>
-<ul>
-<li>definiowana podobnie do $L_{MLE}$</li>
-<li><strong>ale</strong> zamiast likelihood jest posterior</li>
-</ul>
-<ol start="4">
-<li>$L_{MAP}$ obliczany korzystając ze wzoru Bayesa
-$$\begin{align}
-p(w\mid D_{Tr}) &amp;= \dfrac{p(D_{Tr}\mid{}w)p(w)}{p(D_{Tr})} \\
-\ln[p(w\mid D_{Tr})] &amp;= \ln[p(D_{Tr}\mid{}w)] + \ln[p(w)] - \overbrace{\ln[p(D_{Tr})]}^{const} \\
--\dfrac{1}{N}\ln[p(w\mid D_{Tr})] &amp;= -\dfrac{1}{N}\ln[p(D_{Tr}\mid{}w)] -\dfrac{1}{N}\ln[p(w)] + const \\
-L_{MAP}(w) &amp;= L_{MLE}(w) -\dfrac{1}{N}\ln[p(w)]
-\end{align}$$</li>
-<li>prosta reguła na regularyzację metodą MAP</li>
-</ol>
-<ul>
-<li>weź funkcję kosztu MLE</li>
-<li>dodaj składnik $-\dfrac{1}{N}\ln[p(w)]$<ul>
-<li><strong>zależny od parametrów modelu</strong> $w$</li>
-<li><strong>niezależny od danych treningowych</strong></li>
-</ul>
-</li>
-</ul>
-<h4 id="Uwaga">Uwaga<a class="anchor-link" href="#Uwaga">¶</a></h4><ol>
-<li>$L_{MLE}$ to <strong>średnia</strong> po $N$ przykładach</li>
-<li>w takim razie $\ln[p(w)]$ musi być podzielone przez $N$</li>
-</ol>
-<ul>
-<li>jeśli $N$ dąży do nieskończoności, to wpływ wiedzy a priori musi dążyć do zera</li>
-</ul>
-<ol start="3">
-<li>niekiedy $\ln[p(w)]$ nie jest dzielone przez $N$, ale wtedy funkcja kosztu to negative log likelihood, a nie negative <strong>mean</strong> log likelihood</li>
-</ol>
-<ul>
-<li>oba przypadki są równoważne</li>
-</ul>
-<h3 id="Jak-wybra%C4%87-prior">Jak wybrać prior<a class="anchor-link" href="#Jak-wybra%C4%87-prior">¶</a></h3><ul>
-<li>mamy pełną dowolność w zdefiniowaniu $p(w)$<ul>
-<li>ale tylko "dobry" prior pomoże w uczeniu</li>
-<li>np. trzeba uważać, aby prior nie był zero dla żadnej sensownej hipotezy</li>
-</ul>
-</li>
-<li>dobrze zdefiniować go tak, aby łatwo liczył się logarytm<ul>
-<li>funkcja $\exp$ w definicji gęstości — wtedy się wykasuje z logarytmem</li>
-<li>współrzędne $w$ to zmienne niezależne — wtedy $\ln[p(w)] = \sum_{t=1}^T\ln[p(w)]$</li>
-</ul>
-</li>
-<li>ważne są problemy dokładności i stabilności obliczeń</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Z%C5%82o%C5%BCono%C5%9B%C4%87-modelu-a-jego-generalizacja">Złożoność modelu a jego generalizacja<a class="anchor-link" href="#Z%C5%82o%C5%BCono%C5%9B%C4%87-modelu-a-jego-generalizacja">¶</a></h2><img alt="No description has been provided for this image" src="ml_figures/error-complexity.png" style="float: left;" width="440"/>
-<ul>
-<li>generalizacja opisuje skuteczność modelu na przykładach spoza zbioru uczącego $$Err_{tst}=E[L(Y, f(x))\mid D_{tst}]$$</li>
-<li>$err$ to średni loss na zbiorze uczącym $D_{Tr}$<ul>
-<li>błąd na zbiorze uczącym nie jest dobrym estymatorem generalizacji</li>
-</ul>
-</li>
-<li>rozkład błędu modelu $\hat{f}$ na <em>bias</em> i <em>wariancję</em><ul>
-<li><p>niech szumem modelu będzie $\epsilon\sim\mathcal{N}(0,\sigma)$
-$$\begin{align*}
-Err(\hat{f})&amp;=E[(y-\hat{f})^2]&amp;=E[y^2]-2E[y\hat{f}]+E[\hat{f}^2]\\
-\\
-&amp;\textrm{gdzie poszczególne elementy}\\
-E[y^2]&amp;=E[(f+\epsilon)^2]=E[f^2]+2E[f\epsilon]+\epsilon^2\\
-&amp;=E[f^2]+2E[f]\cdot0+\epsilon^2&amp;=f^2+\sigma^2\\
-\\
-&amp;\textrm{dla każdej zmiennej losowej zachodzi}\\
-Var(X)&amp;=E[(X-E[X])^2]=E[X^2]-E[X]^2\\
-&amp;\textrm{stąd}\\
-E[\hat{f}^2]&amp;=&amp;=Var(\hat{f})+E[\hat{f}]^2\\
-\\
-E[y\hat{f}]&amp;=E[(f+\epsilon)\hat{f}]\\
-&amp;=E[f\hat{f}]+E[\epsilon\hat{f}]&amp;=fE[\hat{f}]\\
-\\
-&amp;\textrm{podstawiając}\\
-Err[\hat{f}]&amp;=f^2+\sigma^2-2fE[\hat{f}]+Var(\hat{f})+E[\hat{f}]^2\\
-&amp;=f^2-2f{}E[\hat{f}]+E[\hat{f}]^2+\sigma^2+Var(\hat{f})\\
-&amp;=(f-E[\hat{f}])^2+\sigma^2+Var(\hat{f})&amp;=Bias[\hat{f}]^2+\sigma^2+Var(\hat{f})
-\end{align*}$$
-<img alt="No description has been provided for this image" src="ml_figures/bias-variance-triangle.png" style="float: right;" width="400"/></p>
-</li>
-<li><p>$\sigma^2$ jest nieredukowalnym składnikiem błędu, niemożliwym do usunięcia</p>
-</li>
-<li><p>$Bias[\hat{f}]^2$ określa o ile średnia przybliżeń różni się od prawdziwej średniej</p>
-</li>
-<li><p>$Var(\hat{f})$ jest wariancją modelu $\hat{f}$, oczekiwaną zmiennością funkcji wokół jej średniej</p>
-</li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Regularyzacja-L2-(weight-decay)">Regularyzacja L2 (weight decay)<a class="anchor-link" href="#Regularyzacja-L2-(weight-decay)">¶</a></h2><ol>
-<li>niech priorem będzie rozkład normalny</li>
-</ol>
-<ul>
-<li>zakładamy, że $w_t\sim\mathcal{N}(0,\sigma^2)=\dfrac{1}{\sigma\sqrt{2\pi}}\exp\left(-\dfrac{1}{2}\left(\dfrac{w_t}{\sigma}\right)^2\right)$ dla $t\in\{1,\ldots,T\}$</li>
-<li>współrzędne $w$ są <em>a priori</em> niezależne
-$$\begin{align}
-\ln[p(w)] &amp;= \sum_{t=1}^T\ln[p(w_t)] \\
-&amp;= \sum_{t=1}^T \ln[1/\sigma] + \ln[1/\sqrt{2\pi}] - \dfrac{w_t^2}{2\sigma^2} \\
-&amp;= const - \lambda \sum_{t=1}^T w_t^2 \\
-&amp;= const - \lambda \|w\|^2 \\
-L_{MAP}(w) &amp;= L_{MLE}(w) + \dfrac{\lambda}{N}\|w\|^2 
-\end{align}$$</li>
-</ul>
-<ol start="2">
-<li>$const$ zależy tylko od $T$ i $\sigma$, możemy pominąć przy optymalizacji gradientowej $w$</li>
-<li>parametr $\lambda$ może być dowolną dodatnią liczbą rzeczywistą</li>
-</ol>
-<ul>
-<li>możemy wybrać dowolną liczbę, ponieważ możemy wybrać dowolne $\sigma$<ul>
-<li>czy widać, w jaki sposób $\lambda$ zależy od $\sigma$?</li>
-<li>co się stanie, jeśli wybierzemy ujemne $\lambda$?</li>
-</ul>
-</li>
-<li>gdy $\lambda\to 0$, to $L_{MAP}\to L_{MLE}$<ul>
-<li>jak zmienia się wtedy prior? jaka jest jego "granica"?</li>
-<li>czy to jest zgodne z naszymi oczekiwaniami?</li>
-</ul>
-</li>
-</ul>
-<ol start="4">
-<li>efekt regularyzacji L2</li>
-</ol>
-<ul>
-<li>ograniczenie sumy <strong>kwadratów</strong> współrzędnych</li>
-<li>duże (na moduł) wartości $w$ są bardzo kosztowne<ul>
-<li>stąd nazwa <strong>weight decay</strong><ul>
-<li>uwaga na terminologię - w literaturze "weight decay coefficient" może oznaczać $\lambda$ lub $2\lambda$</li>
+<li>co zmniejsza wymiar przestrzeni rozwiązań z początkowych $\sim1.8\cdot10^{18}$ do ok. $3.0\cdot10^8$, wciąż przy dużej wariancji</li>
+<li>co ciekawe, można łatwo liniowo (!) dopasować wyniki najlepszych modeli dla $w_i$<ul>
+<li>można teraz (w uproszczeniu) wykonać skwantyfikowane poszukiwanie<ul>
+<li>dla danego modelu ustalić głębokość $d$</li>
+<li>grid-search wyszukując optymalną szerokość $w_j$</li>
 </ul>
 </li>
 </ul>
 </li>
-<li>jeśli działanie fragmentu modelu zależy (w przybliżeniu) od <strong>sumy</strong> $M$ współrzędnych $w_{t_1}, \ldots, w_{t_M}$, to model nauczy się tam (w przybliżeniu) równych wartości liczbowych</li>
-</ul>
-<ol start="5">
-<li>Weight decay wpływa na <em>efektywną</em> liczbę parametrów</li>
-</ol>
-<ul>
-<li>parametry nieistotne dla modelu powinny być redukowane do zera<ul>
-<li>L2 (sfera na układzie współrzędnych wag) redukuje pojedyncze wagi bardziej równomiernie</li>
-<li>L1 (wielościan z rogami na wagach) robi to bardziej nierównomiernie lepiej redukując nieistotne wagi</li>
+<li>to pozwala zdefiniować <strong>nową przestrzeń modeli</strong> zdefiniowaną przez parametry głębokości d, parametry modelu dla szerokości, oraz znalezione wcześniej bottleneck b, i liczbę grup g</li>
+<li>to pozwala samplować tą przestrzeń i szukać optymalnego rozwiązania<ul>
+<li>pamiętając o liniowych aproksymacjach</li>
+<li>teraz można także dłużej uczyć</li>
 </ul>
 </li>
-<li>efektywna liczba parametrów jest zwykle określona przez $$df(\lambda)=\sum_k\dfrac{\theta_k}{\theta_k+\lambda}$$ gdzie $\theta_k$ to wartości własne macierzy Hesjanu funkcji kosztu $\dfrac{\nabla^2{}L(w)}{\nabla{}w\nabla{}w^T}$, a więc duże $\lambda$ redukuje bardziej (jak można się było spodziewać)</li>
-</ul>
-<ol start="6">
-<li>regresja liniowa z regularyzacją L2 to tzw. <strong>ridge regression</strong></li>
-</ol>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Inne-popularne-rodzaje-regularyzacji-typu-MAP">Inne popularne rodzaje regularyzacji typu MAP<a class="anchor-link" href="#Inne-popularne-rodzaje-regularyzacji-typu-MAP">¶</a></h2><ol>
-<li><strong>regularyzacja L1</strong> (<strong>lasso</strong>)
-$$L_{MAP}(w) = L_{MLE}(w) + \dfrac{\lambda}{N}\|w\|$$</li>
-</ol>
-<ul>
-<li>norma L1 zamiast normy L2</li>
-<li>odpowiada innemu priorowi<ul>
-<li>podobnie jak w przypadku regresji liniowej - MSE vs MAE</li>
-</ul>
-</li>
-<li>jeśli działanie fragmentu modelu zależy w przybliżeniu od sumy $M$ współrzędnych $w_{t_1}, \ldots, w_{t_M}$, to modelowi opłaca się ustawić na 0 wszystkie $M-1$ współrzędnych poza jedną najistotniejszą<ul>
-<li>regularyzacja L1 zachęca do uczenia <strong>rzadkiego</strong> (<em>sparse</em>) wektora $w$</li>
-<li>zwiększa <strong>interpretowalność</strong> - łatwiej przeanalizować kilka najistotniejszych współrzędnych</li>
-</ul>
-</li>
-</ul>
-<ol start="2">
-<li>połączenie L1 i L2 (<strong>elastic net</strong>)
-$$L_{MAP}(w) = L_{MLE}(w) + \dfrac{\lambda_1}{N}\|w\| + \dfrac{\lambda_2}{N}\|w\|^2$$</li>
-</ol>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Regularyzacja-w-praktyce">Regularyzacja w praktyce<a class="anchor-link" href="#Regularyzacja-w-praktyce">¶</a></h2><ol>
-<li>zazwyczaj wystarczy użyć L2</li>
-<li>należy przetestować wiele różnych $\lambda$ (nauczyć kilka modeli)</li>
-<li>można dobierać różne $\lambda$ dla różnych współrzędnych</li>
-</ol>
-<ul>
-<li>np. różne $\lambda$ dla różnych warstw sieci neuronowej</li>
-<li>ale jeśli to nie ma dobrego uzasadnienia, to zazwyczaj szkoda na to czasu</li>
-</ul>
-<ol start="4">
-<li>powyższe regularyzacje zbliżają $w$ do zera</li>
-</ol>
-<ul>
-<li>np. sieciach neuronowych ustawienie wszystkich wag na 0 z reguły sprawi, że klasyfikator zwróci rozkład jednostajny, a regressor zero</li>
-<li>można oczywiście zrobić inaczej, np. użyć $\sum_{t=1}^T (w_t - 1)^2$<ul>
-<li>ale musimy mieć dobre uzasadnienie, że wszystkie współrzędne powinny wynosić w przybliżeniu 1</li>
-<li>zazwyczaj nie mamy</li>
-</ul>
-</li>
-</ul>
-<ol start="5">
-<li>można definiować własne regularyzacje</li>
-</ol>
-<ul>
-<li>pomysłowe regularyzacje mogą znacznie poprawić uczenie modelu</li>
-<li>nie trzeba przejmować się, czy odpowiadają jakiemukolwiek priorowi<ul>
-<li>w najgorszym razie model nie zadziała, ale warto dlaczego</li>
-</ul>
-<!-- * warto rozumieć związek regularyzacji L2 oraz L1 z priorem ;-) -->
-</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Niezmienniki-(inwariancje)">Niezmienniki (inwariancje)<a class="anchor-link" href="#Niezmienniki-(inwariancje)">¶</a></h3><ul>
-<li>jeśli dla wielu wzorów predykcje nie mają się zmieniać, to odpowiada <em>wbudowywaniu niezmienników</em> (<em>inwariancji</em>)<ul>
-<li>szczególnie w rozpoznawaniu wzorców (translacje, obroty), czy dźwięków (np. głośność)</li>
-<li>przy odpowiedniej liczbie wzorców model może nauczyć się niezmienników<ul>
-<li>można dodać odpowiednią liczbę powtórzeń przykładów odpowiednio zmodyfikowanych (augmentacje)</li>
-<li>dzielone wagi oraz tzw. pooling, jak w przypadku sieci konwolucyjnych, mogą być przykładem wbudowanych do architektury sieci niezmienników</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>niezmienniki są modelem wykorzystywanym w tzw. uczeniu ustawicznym (ciągłym, ang. continual learning)<ul>
-<li>model uczy się szeregu następujących po sobie problemów</li>
-<li>po nauczeniu problemu $X_k$, pojawia się kolejny $X_{k+1}$</li>
-<li>algorytm uczący <strong>nie ma już dostępu</strong> do danych $X_k$</li>
-<li>wprowadzenie niezmienników odpowiada temu, by predykcje dla przykładów z $X_k, X_{k-1},\dots$ pozostały bez zmian</li>
-<li>to jest bardzo trudne zadanie, ale aktualne</li>
-</ul>
-</li>
-<li>wiele potrzebnych augmentacji dla standardowych problemów jest dostepnych w bibliotekach, np. <code>torchvision.transforms</code></li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Early-stopping">Early stopping<a class="anchor-link" href="#Early-stopping">¶</a></h2><ul>
-<li>podobnie jak w przypadku zależności błędu uczącego i generalizacji w zależności od złożoności modelu, jest on zależny od długości uczenia (liczby epok)<ul>
-<li>model wraz z liczbą epok staje się coraz bardziej 'dopasowany', a stąd i złożony</li>
-<li>pewnym rozwiązaniem może być wcześniejsze zatrzymanie uczenia</li>
-<li>wymaga wielu prób i zapamiętywania modeli</li>
-</ul>
-</li>
+<li>najlepsze 5 modeli uczymy już prawie w pełni</li>
 </ul>
 </div>
 </div>

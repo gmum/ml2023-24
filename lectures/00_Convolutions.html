@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>24_0_Regularyzacja</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>00_Convolutions</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7476,393 +7476,659 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0782be94-4f47-4072-a2d1-f3c6b3b478b8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="MUM-2023-24-Regularyzacja">MUM 2023-24 Regularyzacja<a class="anchor-link" href="#MUM-2023-24-Regularyzacja">¶</a></h1>
+<h1 id="MUM-2023-modele-konwolucyjne">MUM 2023 modele konwolucyjne<a class="anchor-link" href="#MUM-2023-modele-konwolucyjne">¶</a></h1>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=897a0e6c-37b5-444b-9f5c-3fbeec502562">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">d2l</span> <span class="kn">import</span> <span class="n">torch</span> <span class="k">as</span> <span class="n">d2l</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline 
+</pre></div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=284fed2a-bfa6-46af-9eb2-255f56cf22b1">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Problem-i-cel">Problem i cel<a class="anchor-link" href="#Problem-i-cel">¶</a></h2><ul>
-<li>model jest budowany z wykorzystaniem dostępnych danych<ul>
-<li>dostępnych danych jest zwykle zbyt mało i budowa modelu z reguły prowadzi do jednego z dwóch problemów<ul>
-<li><strong>underfitting</strong> gdy model zbytnio uogólnia</li>
-<li><strong>overfitting</strong> gdy model jest zbyt szczegółowy i zbyt dokładnie dopasowuje się do dostępnych danych <a href="./23_Overfitting.ipynb">overfitting</a></li>
-</ul>
-</li>
-<li>regularyzacja powinna poprawić <strong>wynik na zbiorze testowym</strong>, często kosztem danych treningowych</li>
-</ul>
-</li>
-</ul>
-<img alt="No description has been provided for this image" src="ml_figures/function-space-reduction.png" style="float: right;" width="450"/>
 <ul>
-<li>regularyzacja może być<ul>
-<li>dodaniem pewnej wiedzy wstępnej <em>a priori</em> do modelu przez użycie założonego rozkładu parametrów<ul>
-<li>to ogranicza <strong>pojemność modelu</strong> jednocześnie ograniczając overfitting</li>
-</ul>
-</li>
-<li>ograniczeniem przestrzeni funkcji, np. ograniczenie użytych wykładników w aproksymacji wielomianowej</li>
-<li>dowolną modyfikacją uczenia poprawiającą generalizację kosztem błędu uczenia (Ian Goodfellow)</li>
-</ul>
-</li>
-<li>generalnie regularyzacja jest związana z ograniczeniem liczby parametrów<ul>
-<li>miary AIC (Akaike) i BIC (Bayesian) Information Criterion</li>
+<li>modele typu MLPokazują się bardzo nieefektywne przy danych tablicowych<ul>
+<li>obraz 1000 na 1000 z 1000 na 1000 neuronów w warstwie ukrytej będzie już od razu miał $10^{12}$ parametrów</li>
+<li>architektura kompletnie nie wykorzystuje redundancji obrazów (danych)<ul>
+<li>inwariancja ze względu na translację, obrót</li>
+<li>MLP nie wykorzystuje lokalności danych</li>
 </ul>
 </li>
 </ul>
-<h4 id="uwaga">uwaga<a class="anchor-link" href="#uwaga">¶</a></h4><ol>
-<li>regularyzacja modyfikuje funkcję kosztu <strong>tylko na zbiorze treningowym</strong></li>
-<li>na <strong>zbiorze testowym</strong> sprawdzamy <strong>oryginalną funkcję kosztu</strong> (i ew. inne metryki, np. accuracy)</li>
-</ol>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Najpopularniejsze-modele-regularyzacji">Najpopularniejsze modele regularyzacji<a class="anchor-link" href="#Najpopularniejsze-modele-regularyzacji">¶</a></h2><ul>
-<li>weight decay</li>
-<li>early stopping</li>
-<li>dropout</li>
-<li>batch normalization</li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Podej%C5%9Bcia-do-uczenia">Podejścia do uczenia<a class="anchor-link" href="#Podej%C5%9Bcia-do-uczenia">¶</a></h2><ul>
-<li>podstawy do podejść do uczenia w notebooku <a href="./stat_04_Twierdzenie_Bayesa.ipynb">MLE i MAP</a></li>
-</ul>
-<h3 id="Uczenie-Maximum-Likelihood-Estimator-(MLE)">Uczenie Maximum Likelihood Estimator (MLE)<a class="anchor-link" href="#Uczenie-Maximum-Likelihood-Estimator-(MLE)">¶</a></h3><ul>
-<li>Szukamy takiego $w_\ast$, które zmaksymalizuje wartość liczbową likelihoodu:
-$$w_\ast = \underset{w}{\arg\max}\;p\,(D_{Tr}\mid{}w)$$<ul>
-<li>$w$ jest zestawem parametrów odpowiadającym przyjętej hipotezie</li>
-<li>MLE szuka najlepszych parametrów z obserwowanych przykładów</li>
-<li>w MLE funkcja kosztu estymuje jak rozkład predykcji modelu odpowiada rozkładowi danych uczących</li>
-<li>MLE jest <strong>spójny</strong>: wraz ze wzrostem liczby przykładów uczących poprawia się estymacja parametrów modelu</li>
-</ul>
 </li>
 </ul>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Uczenie-Maximum-a-Posteriori-(MAP)">Uczenie Maximum a Posteriori (MAP)<a class="anchor-link" href="#Uczenie-Maximum-a-Posteriori-(MAP)">¶</a></h3><ol>
-<li>$w$ - wektor wszystkich parametrów modelu</li>
-<li>$L_{MLE}$ - funkcja kosztu negative mean log likelihood (z dokładnością do stałych)</li>
-<li>$L_{MAP}$ - funkcja kosztu <strong>negative mean log posterior</strong> (z dokładnością do stałych)</li>
-</ol>
-<ul>
-<li>definiowana podobnie do $L_{MLE}$</li>
-<li><strong>ale</strong> zamiast likelihood jest posterior</li>
-</ul>
-<ol start="4">
-<li>$L_{MAP}$ obliczany korzystając ze wzoru Bayesa
+<h2 id="konwolucje">konwolucje<a class="anchor-link" href="#konwolucje">¶</a></h2><ul>
+<li>niech sieć (MLP) "każdy z każdym" ma 2-wymiarowe wejściowe obrazy $X$ (indeksowane przez k, l) oraz ukryte reprezentacje $H$ (indeksowane i, j)
 $$\begin{align}
-p(w\mid D_{Tr}) &amp;= \dfrac{p(D_{Tr}\mid{}w)p(w)}{p(D_{Tr})} \\
-\ln[p(w\mid D_{Tr})] &amp;= \ln[p(D_{Tr}\mid{}w)] + \ln[p(w)] - \overbrace{\ln[p(D_{Tr})]}^{const} \\
--\dfrac{1}{N}\ln[p(w\mid D_{Tr})] &amp;= -\dfrac{1}{N}\ln[p(D_{Tr}\mid{}w)] -\dfrac{1}{N}\ln[p(w)] + const \\
-L_{MAP}(w) &amp;= L_{MLE}(w) -\dfrac{1}{N}\ln[p(w)]
-\end{align}$$</li>
-<li>prosta reguła na regularyzację metodą MAP</li>
-</ol>
+[H]_{ij}&amp;=[U]_{ij}+\sum_k\sum_l[W]_{ijkl}[X]_{kl}\\
+&amp;=[U]_{ij}+\sum_a\sum_b[V]_{ijab}[X]_{i+a,j+b}
+\end{align}$$<ul>
+<li>zamiana W na V to tylko przeindeksowanie $[W]_{ijkl}=[V]_{i, j, i+a, j+b}$</li>
+<li>W jest 4-wymiarowym tensorem</li>
+</ul>
+</li>
+<li><strong>niezależność ze względu na translację</strong>: niech macierz $[V]$ będzie <strong>niezależna</strong> od położenia i przesunięcie wejścia powoduje przesunięcie wartości ukrytej
+$$[H]_{ij}=u+\sum_a\sum_b[V]_{ab}[X]_{i+a,j+b}$$<ul>
+<li><p>wartość $u$ jest wobec tego skalarem niezależnym od położenia
+<img alt="No description has been provided for this image" src="ml_figures/conv2d.png" style="float: right;" width="400"/></p>
+</li>
+<li><p>w ten sposób mamy <strong>konwolucję</strong>
+$$(f\ast{}g)(x)=\int{}f(z)g(x-z)dz$$</p>
 <ul>
-<li>weź funkcję kosztu MLE</li>
-<li>dodaj składnik $-\dfrac{1}{N}\ln[p(w)]$<ul>
-<li><strong>zależny od parametrów modelu</strong> $w$</li>
-<li><strong>niezależny od danych treningowych</strong></li>
+<li>dla obrazów w postaci dyskretnej mamy
+$$(f\ast{}g)(i)=\sum_a f(a)g(i-a)$$
+lub dla dwuwymiarowych $$(f\ast{}g)(i,j)=\sum_a\sum_b f(a,b)g(i-a,j-b)$$</li>
+</ul>
+</li>
+<li><p>dla $a,b\in(-1000, 1000)$ dostajemy $4\times10^6$ parametrów</p>
+</li>
+<li><p>tak zdefiniowane konwolucje powinny być zwane kross-korelacjami</p>
+</li>
 </ul>
 </li>
 </ul>
-<h4 id="Uwaga">Uwaga<a class="anchor-link" href="#Uwaga">¶</a></h4><ol>
-<li>$L_{MLE}$ to <strong>średnia</strong> po $N$ przykładach</li>
-<li>w takim razie $\ln[p(w)]$ musi być podzielone przez $N$</li>
-</ol>
-<ul>
-<li>jeśli $N$ dąży do nieskończoności, to wpływ wiedzy a priori musi dążyć do zera</li>
-</ul>
-<ol start="3">
-<li>niekiedy $\ln[p(w)]$ nie jest dzielone przez $N$, ale wtedy funkcja kosztu to negative log likelihood, a nie negative <strong>mean</strong> log likelihood</li>
-</ol>
-<ul>
-<li>oba przypadki są równoważne</li>
-</ul>
-<h3 id="Jak-wybra%C4%87-prior">Jak wybrać prior<a class="anchor-link" href="#Jak-wybra%C4%87-prior">¶</a></h3><ul>
-<li>mamy pełną dowolność w zdefiniowaniu $p(w)$<ul>
-<li>ale tylko "dobry" prior pomoże w uczeniu</li>
-<li>np. trzeba uważać, aby prior nie był zero dla żadnej sensownej hipotezy</li>
+<h2 id="lokalno%C5%9B%C4%87">lokalność<a class="anchor-link" href="#lokalno%C5%9B%C4%87">¶</a></h2><ul>
+<li>kolejnym założeniem jest, że wartość $[H]_{ij}$ powinna być zależna jedynie od niewielu punktów w otoczeniu $[X]_{ij}$
+$$[H]_{ij}=u+\sum_{-\Delta}^{+\Delta}\sum_{-\Delta}^{+\Delta}[V]_{ab}[X]_{i+a,j+b}$$<ul>
+<li>to ogranicza liczbę parametrów do $4\times\Delta^2$<ul>
+<li>$\Delta$ jest tu użyta jako promień</li>
 </ul>
 </li>
-<li>dobrze zdefiniować go tak, aby łatwo liczył się logarytm<ul>
-<li>funkcja $\exp$ w definicji gęstości — wtedy się wykasuje z logarytmem</li>
-<li>współrzędne $w$ to zmienne niezależne — wtedy $\ln[p(w)] = \sum_{t=1}^T\ln[p(w)]$</li>
+<li>$[V]$ nazywamy zwykle kernelem</li>
+<li>mamy bardzo ograniczoną liczbę parametrów</li>
+<li>parametry są <strong>dzielone</strong> (shared), a więc uczą się wykrywania tych samych cech w różnych częściach wejścia</li>
 </ul>
 </li>
-<li>ważne są problemy dokładności i stabilności obliczeń</li>
+</ul>
+<h2 id="kana%C5%82y">kanały<a class="anchor-link" href="#kana%C5%82y">¶</a></h2><ul>
+<li><p>w przypadku obrazów każdy piksel jest zwykle złożony z trzech kolorów -- <strong>kanałów</strong></p>
+<ul>
+<li>macierz parametrów staje się trójwymiarowa $[V]_{a,b,c}$</li>
+<li>dla każdego położenia będziemy mieli cały wektor reprezentacji o indeksowany przez $d$, tworzący nowy kanał w reprezentacji ukrytej
+$$[H]_{ijd}=\sum_{-\Delta}^{+\Delta}\sum_{-\Delta}^{+\Delta}\sum_c[V]_{abcd}[X]_{i+a,j+b,c}$$
+dając trzeci wymiar $H$</li>
+<li>oczywiście nie tylko kolory są legalnymi kanałami<ul>
+<li>rzeczywiste obrazy są tworzone w bardzo wielu kanałach odpowiadających różnym częstotliwościom</li>
+<li>w szczególności utworzone powyżej reprezentacje też generują kanały</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>konwolucje przez dzielenie wag ograniczają liczbę parametrów</p>
+</li>
+<li><p>w dalszym ciągu bardzo wysoka jest liczba koniecznych obliczeń rzędu $O(h\cdot w\cdot k^2\cdot{}c_{in}\cdot{}c_{out})$ dla konwolucji $k\times{}k$</p>
+</li>
 </ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a89ac490-c979-4e38-9d64-413f1a5ebe00">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Z%C5%82o%C5%BCono%C5%9B%C4%87-modelu-a-jego-generalizacja">Złożoność modelu a jego generalizacja<a class="anchor-link" href="#Z%C5%82o%C5%BCono%C5%9B%C4%87-modelu-a-jego-generalizacja">¶</a></h2><img alt="No description has been provided for this image" src="ml_figures/error-complexity.png" style="float: left;" width="440"/>
+<h2 id="padding,-stride,-dilation">padding, stride, dilation<a class="anchor-link" href="#padding,-stride,-dilation">¶</a></h2><ul>
+<li>obliczając cross-correlation obrazu z kernelem konwolucji, zwykle<ul>
+<li>zaczynamy od lewego górnego, kończymy na prawym dolnym rogu,</li>
+<li>przesunięcie o jeden w poziomie i pionie</li>
+</ul>
+</li>
+</ul>
+<p>co powoduje zredukowanie informacji o brzegach oraz zmniejszenie obrazu</p>
+<h3 id="padding">padding<a class="anchor-link" href="#padding">¶</a></h3><img alt="No description has been provided for this image" src="ml_figures/padding.gif" style="float: right;" width="350"/>
 <ul>
-<li>generalizacja opisuje skuteczność modelu na przykładach spoza zbioru uczącego $$Err_{tst}=E[L(Y, f(x))\mid D_{tst}]$$</li>
-<li>$err$ to średni loss na zbiorze uczącym $D_{Tr}$<ul>
-<li>błąd na zbiorze uczącym nie jest dobrym estymatorem generalizacji</li>
+<li>dodanie kolumn i wierszy po wszystkich stronach<ul>
+<li>dodaje kontrolę nad wymiarem</li>
+<li>zachowanie informacji o brzegach</li>
+<li>zwykle zera na dodanych pozycjach - algorytm może wiedzieć gdzie "zaczynają" się zera bez ich fizycznej reprezentacji<ul>
+<li>padding nie musi być wypełniony zerami, ale nie ma jasnych wskazówek kiedy</li>
 </ul>
 </li>
-<li>rozkład błędu modelu $\hat{f}$ na <em>bias</em> i <em>wariancję</em><ul>
-<li><p>niech szumem modelu będzie $\epsilon\sim\mathcal{N}(0,\sigma)$
-$$\begin{align*}
-Err(\hat{f})&amp;=E[(y-\hat{f})^2]&amp;=E[y^2]-2E[y\hat{f}]+E[\hat{f}^2]\\
-\\
-&amp;\textrm{gdzie poszczególne elementy}\\
-E[y^2]&amp;=E[(f+\epsilon)^2]=E[f^2]+2E[f\epsilon]+\epsilon^2\\
-&amp;=E[f^2]+2E[f]\cdot0+\epsilon^2&amp;=f^2+\sigma^2\\
-\\
-&amp;\textrm{dla każdej zmiennej losowej zachodzi}\\
-Var(X)&amp;=E[(X-E[X])^2]=E[X^2]-E[X]^2\\
-&amp;\textrm{stąd}\\
-E[\hat{f}^2]&amp;=&amp;=Var(\hat{f})+E[\hat{f}]^2\\
-\\
-E[y\hat{f}]&amp;=E[(f+\epsilon)\hat{f}]\\
-&amp;=E[f\hat{f}]+E[\epsilon\hat{f}]&amp;=fE[\hat{f}]\\
-\\
-&amp;\textrm{podstawiając}\\
-Err[\hat{f}]&amp;=f^2+\sigma^2-2fE[\hat{f}]+Var(\hat{f})+E[\hat{f}]^2\\
-&amp;=f^2-2f{}E[\hat{f}]+E[\hat{f}]^2+\sigma^2+Var(\hat{f})\\
-&amp;=(f-E[\hat{f}])^2+\sigma^2+Var(\hat{f})&amp;=Bias[\hat{f}]^2+\sigma^2+Var(\hat{f})
-\end{align*}$$
-<img alt="No description has been provided for this image" src="ml_figures/bias-variance-triangle.png" style="float: right;" width="400"/></p>
-</li>
-<li><p>$\sigma^2$ jest nieredukowalnym składnikiem błędu, niemożliwym do usunięcia</p>
-</li>
-<li><p>$Bias[\hat{f}]^2$ określa o ile średnia przybliżeń różni się od prawdziwej średniej</p>
-</li>
-<li><p>$Var(\hat{f})$ jest wariancją modelu $\hat{f}$, oczekiwaną zmiennością funkcji wokół jej średniej</p>
-</li>
+<li>zapewnia, że wszystkie piksele są używane równie często</li>
 </ul>
 </li>
+</ul>
+<h3 id="stride">stride<a class="anchor-link" href="#stride">¶</a></h3><img alt="No description has been provided for this image" src="ml_figures/stride.gif" style="float: left;" width="350"/>
+<ul>
+<li>przeskok obliczeń co ustaloną liczbę wierszy / kolumn</li>
+<li>zwykle, podobnie jak padding, takie same w poziomie i pionie</li>
+<li>forma downsamplingu dla efektywności<ul>
+<li>szczególnie gdy same konwolucje są duże</li>
+</ul>
+</li>
+</ul>
+<h3 id="dilation">dilation<a class="anchor-link" href="#dilation">¶</a></h3><img alt="No description has been provided for this image" src="ml_figures/dilation.gif" style="float: right;" width="350"/>
+<ul>
+<li>dodanie przerw co ustaloną liczbę kolumn/wierszy<ul>
+<li>dylacja k oznacza opuszczenie k-1 wierszy / kolumn</li>
+</ul>
+</li>
+<li>zwykle przy pozostawionym stride, niekoniecznie</li>
+<li>dylacja zwiększa kwadratowo (wykładniczo dla większej liczby wymiarów wejsciowego "obrazu") pola recepcyjnego</li>
+<li>większe zwrócenie uwagi na ogólne cechy</li>
+<li>ewentualnie także przyspieszenie pracy</li>
 </ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=98b97140-b7f9-4010-8a4f-ed88690edef0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Regularyzacja-L2-(weight-decay)">Regularyzacja L2 (weight decay)<a class="anchor-link" href="#Regularyzacja-L2-(weight-decay)">¶</a></h2><ol>
-<li>niech priorem będzie rozkład normalny</li>
-</ol>
-<ul>
-<li>zakładamy, że $w_t\sim\mathcal{N}(0,\sigma^2)=\dfrac{1}{\sigma\sqrt{2\pi}}\exp\left(-\dfrac{1}{2}\left(\dfrac{w_t}{\sigma}\right)^2\right)$ dla $t\in\{1,\ldots,T\}$</li>
-<li>współrzędne $w$ są <em>a priori</em> niezależne
-$$\begin{align}
-\ln[p(w)] &amp;= \sum_{t=1}^T\ln[p(w_t)] \\
-&amp;= \sum_{t=1}^T \ln[1/\sigma] + \ln[1/\sqrt{2\pi}] - \dfrac{w_t^2}{2\sigma^2} \\
-&amp;= const - \lambda \sum_{t=1}^T w_t^2 \\
-&amp;= const - \lambda \|w\|^2 \\
-L_{MAP}(w) &amp;= L_{MLE}(w) + \dfrac{\lambda}{N}\|w\|^2 
-\end{align}$$</li>
-</ul>
-<ol start="2">
-<li>$const$ zależy tylko od $T$ i $\sigma$, możemy pominąć przy optymalizacji gradientowej $w$</li>
-<li>parametr $\lambda$ może być dowolną dodatnią liczbą rzeczywistą</li>
-</ol>
-<ul>
-<li>możemy wybrać dowolną liczbę, ponieważ możemy wybrać dowolne $\sigma$<ul>
-<li>czy widać, w jaki sposób $\lambda$ zależy od $\sigma$?</li>
-<li>co się stanie, jeśli wybierzemy ujemne $\lambda$?</li>
-</ul>
-</li>
-<li>gdy $\lambda\to 0$, to $L_{MAP}\to L_{MLE}$<ul>
-<li>jak zmienia się wtedy prior? jaka jest jego "granica"?</li>
-<li>czy to jest zgodne z naszymi oczekiwaniami?</li>
-</ul>
-</li>
-</ul>
-<ol start="4">
-<li>efekt regularyzacji L2</li>
-</ol>
-<ul>
-<li>ograniczenie sumy <strong>kwadratów</strong> współrzędnych</li>
-<li>duże (na moduł) wartości $w$ są bardzo kosztowne<ul>
-<li>stąd nazwa <strong>weight decay</strong><ul>
-<li>uwaga na terminologię - w literaturze "weight decay coefficient" może oznaczać $\lambda$ lub $2\lambda$</li>
+<h2 id="Wiele-kana%C5%82%C3%B3w">Wiele kanałów<a class="anchor-link" href="#Wiele-kana%C5%82%C3%B3w">¶</a></h2><h3 id="wiele-kana%C5%82%C3%B3w-wej%C5%9Bciowych">wiele kanałów wejściowych<a class="anchor-link" href="#wiele-kana%C5%82%C3%B3w-wej%C5%9Bciowych">¶</a></h3><ul>
+<li>dla RGB konwolucje są w rzeczywistości $w\times h\times3$ dla $c_{in}=3$ (załóżmy obraz 2-wymiarowy))<ul>
+<li>dla każdego kanału jest osobna konwolucja $w\times h$</li>
+<li>obliczane niezależnie na każdym kanale</li>
+<li>na końcu sumowane w poprzek kanałów<ul>
+<li>o ile jest jeden kanał wyjściowy</li>
 </ul>
 </li>
 </ul>
 </li>
-<li>jeśli działanie fragmentu modelu zależy (w przybliżeniu) od <strong>sumy</strong> $M$ współrzędnych $w_{t_1}, \ldots, w_{t_M}$, to model nauczy się tam (w przybliżeniu) równych wartości liczbowych</li>
 </ul>
-<ol start="5">
-<li>Weight decay wpływa na <em>efektywną</em> liczbę parametrów</li>
-</ol>
-<ul>
-<li>parametry nieistotne dla modelu powinny być redukowane do zera<ul>
-<li>L2 (sfera na układzie współrzędnych wag) redukuje pojedyncze wagi bardziej równomiernie</li>
-<li>L1 (wielościan z rogami na wagach) robi to bardziej nierównomiernie lepiej redukując nieistotne wagi</li>
+<h3 id="i-wiele-wyj%C5%9Bciowych">i wiele wyjściowych<a class="anchor-link" href="#i-wiele-wyj%C5%9Bciowych">¶</a></h3><ul>
+<li>większość modeli CNN <strong>zmniejsza</strong> wymiarowość przestrzenną, jednocześnie <strong>zwiększając</strong> liczbę kanałów (głębokość)</li>
+<li>kanały są wykorzystywane <strong>wspólnie</strong><ul>
+<li>dla każdego z wielu kanałów wyjściowych tworzona jest konwolucja $c_{in}\times w\times h$<ul>
+<li>poszczególne wyniki są konkatenowane</li>
+<li>w efekcie kernel jest $c_{in}\times{}c_{out}\times{}w\times{}h$</li>
 </ul>
 </li>
-<li>efektywna liczba parametrów jest zwykle określona przez $$df(\lambda)=\sum_k\dfrac{\theta_k}{\theta_k+\lambda}$$ gdzie $\theta_k$ to wartości własne macierzy Hesjanu funkcji kosztu $\dfrac{\nabla^2{}L(w)}{\nabla{}w\nabla{}w^T}$, a więc duże $\lambda$ redukuje bardziej (jak można się było spodziewać)</li>
+<li>prosta intuicja mówiłaby, ze kanały wydobywają różne cechy</li>
+<li>w rzeczywistości poszczególne kanały wykrywają wiele cech jednocześnie</li>
 </ul>
-<ol start="6">
-<li>regresja liniowa z regularyzacją L2 to tzw. <strong>ridge regression</strong></li>
-</ol>
+</li>
+</ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c23e4d48-c19d-4a03-8fbc-6b127d938d51">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Inne-popularne-rodzaje-regularyzacji-typu-MAP">Inne popularne rodzaje regularyzacji typu MAP<a class="anchor-link" href="#Inne-popularne-rodzaje-regularyzacji-typu-MAP">¶</a></h2><ol>
-<li><strong>regularyzacja L1</strong> (<strong>lasso</strong>)
-$$L_{MAP}(w) = L_{MLE}(w) + \dfrac{\lambda}{N}\|w\|$$</li>
-</ol>
-<ul>
-<li>norma L1 zamiast normy L2</li>
-<li>odpowiada innemu priorowi<ul>
-<li>podobnie jak w przypadku regresji liniowej - MSE vs MAE</li>
-</ul>
-</li>
-<li>jeśli działanie fragmentu modelu zależy w przybliżeniu od sumy $M$ współrzędnych $w_{t_1}, \ldots, w_{t_M}$, to modelowi opłaca się ustawić na 0 wszystkie $M-1$ współrzędnych poza jedną najistotniejszą<ul>
-<li>regularyzacja L1 zachęca do uczenia <strong>rzadkiego</strong> (<em>sparse</em>) wektora $w$</li>
-<li>zwiększa <strong>interpretowalność</strong> - łatwiej przeanalizować kilka najistotniejszych współrzędnych</li>
+<h2 id="konwolucje-$1%5Ctimes1$">konwolucje $1\times1$<a class="anchor-link" href="#konwolucje-$1%5Ctimes1$">¶</a></h2><ul>
+<li>najprościej patrząc konwolucja $1\times1$ oblicza korelację sąsiadujących w kanałach wektorów pikseli<ul>
+<li>nie wykorzystuje informacji o sąsiedztwie</li>
+<li>wciąż może być wiele kanałów wyjściowych</li>
+<li>zwykle po takich konwolucjach użyta jest funkcja nieliniowa<ul>
+<li>podobieństwo do obliczeń w MLP</li>
 </ul>
 </li>
 </ul>
-<ol start="2">
-<li>połączenie L1 i L2 (<strong>elastic net</strong>)
-$$L_{MAP}(w) = L_{MLE}(w) + \dfrac{\lambda_1}{N}\|w\| + \dfrac{\lambda_2}{N}\|w\|^2$$</li>
-</ol>
+</li>
+</ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ded0d2d5-d285-4f3c-b4c7-532595ce3a37">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Regularyzacja-w-praktyce">Regularyzacja w praktyce<a class="anchor-link" href="#Regularyzacja-w-praktyce">¶</a></h2><ol>
-<li>zazwyczaj wystarczy użyć L2</li>
-<li>należy przetestować wiele różnych $\lambda$ (nauczyć kilka modeli)</li>
-<li>można dobierać różne $\lambda$ dla różnych współrzędnych</li>
-</ol>
-<ul>
-<li>np. różne $\lambda$ dla różnych warstw sieci neuronowej</li>
-<li>ale jeśli to nie ma dobrego uzasadnienia, to zazwyczaj szkoda na to czasu</li>
+<h2 id="pooling">pooling<a class="anchor-link" href="#pooling">¶</a></h2><ul>
+<li>model CNN agreguje informacje z cech niższego poziomu na bardziej ogólne<ul>
+<li>prostym przykładem jest składanie liter z linii, bądźmy ostrożni z tak symplicystycznym wytłumaczeniem</li>
 </ul>
-<ol start="4">
-<li>powyższe regularyzacje zbliżają $w$ do zera</li>
-</ol>
-<ul>
-<li>np. sieciach neuronowych ustawienie wszystkich wag na 0 z reguły sprawi, że klasyfikator zwróci rozkład jednostajny, a regressor zero</li>
-<li>można oczywiście zrobić inaczej, np. użyć $\sum_{t=1}^T (w_t - 1)^2$<ul>
-<li>ale musimy mieć dobre uzasadnienie, że wszystkie współrzędne powinny wynosić w przybliżeniu 1</li>
-<li>zazwyczaj nie mamy</li>
+</li>
+<li>potrzebny jest operator pozwalający na niezależność cech od przesunięcia
+<img alt="No description has been provided for this image" src="ml_figures/pooling.png" style="float: right;" width="340"/></li>
+</ul>
+<h3 id="max-pooling">max-pooling<a class="anchor-link" href="#max-pooling">¶</a></h3><ul>
+<li>w neuronaukach informacja jest agregowana w sposób hierarchiczny</li>
+<li>max-pooling odpowiada wyborowi najsilniejszej cechy i jest zwykle efektywniejsza od average-pooling</li>
+<li>jeśli kernel konwolucji ma wykrywać krawędzie, to max-pooling odpowie czy krawędź jest obecna na którymkolwiek z pól szerszego obszaru<ul>
+<li>obliczenia są proste z użyciem operatora max lub średniej</li>
+</ul>
+</li>
+<li>pooling zmniejsza obszar<ul>
+<li>możemy uzyć odpowiednich padding czy stride dla utrzymania odpowiednich wymiarów</li>
+</ul>
+</li>
+<li>pooling <strong>nie zmienia</strong> liczby kanałów<ul>
+<li>operator pooling jest aplikowany do każdego kanału osobno</li>
 </ul>
 </li>
 </ul>
-<ol start="5">
-<li>można definiować własne regularyzacje</li>
-</ol>
-<ul>
-<li>pomysłowe regularyzacje mogą znacznie poprawić uczenie modelu</li>
-<li>nie trzeba przejmować się, czy odpowiadają jakiemukolwiek priorowi<ul>
-<li>w najgorszym razie model nie zadziała, ale warto dlaczego</li>
-</ul>
-<!-- * warto rozumieć związek regularyzacji L2 oraz L1 z priorem ;-) -->
-</li>
+<h3 id="average-pooling">average-pooling<a class="anchor-link" href="#average-pooling">¶</a></h3><ul>
+<li>przypomina / jest równoważne zmniejszanie rozdzielczości obrazu</li>
+<li>zamiast szukania cech pomijając kolumny/wiersze, lepiej jest uśrednić znalezione cechy</li>
 </ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0a462a05-b84c-4aa8-9b7b-43b42a1b4096">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Niezmienniki-(inwariancje)">Niezmienniki (inwariancje)<a class="anchor-link" href="#Niezmienniki-(inwariancje)">¶</a></h3><ul>
-<li>jeśli dla wielu wzorów predykcje nie mają się zmieniać, to odpowiada <em>wbudowywaniu niezmienników</em> (<em>inwariancji</em>)<ul>
-<li>szczególnie w rozpoznawaniu wzorców (translacje, obroty), czy dźwięków (np. głośność)</li>
-<li>przy odpowiedniej liczbie wzorców model może nauczyć się niezmienników<ul>
-<li>można dodać odpowiednią liczbę powtórzeń przykładów odpowiednio zmodyfikowanych (augmentacje)</li>
-<li>dzielone wagi oraz tzw. pooling, jak w przypadku sieci konwolucyjnych, mogą być przykładem wbudowanych do architektury sieci niezmienników</li>
+<h2 id="Uczenie">Uczenie<a class="anchor-link" href="#Uczenie">¶</a></h2><ul>
+<li>wszystkie parametry konwolucji są wyszukiwane w trakcie uczenia<ul>
+<li>zwykle standardowe uczenie wsteczną propagacją</li>
+</ul>
+</li>
+<li>hiper-parametry padding, stride, dilation, pooling są ustalone<ul>
+<li>istnieją odmiany pooling, które są uczone, chociaż w metodach attention</li>
+</ul>
+</li>
+<li>potrzeba dobrze zaprojektować model CNN<ul>
+<li>w sieci jest wiele kalkulatorów dla obliczania wielkości kolejnych warstw (nie, żeby to było trudne) 😩
+$$out=\left\lfloor\dfrac{in + 2 * padding - (kernel - 1) - 1}{stride}\right\rfloor+1$$</li>
 </ul>
 </li>
 </ul>
-</li>
-<li>niezmienniki są modelem wykorzystywanym w tzw. uczeniu ustawicznym (ciągłym, ang. continual learning)<ul>
-<li>model uczy się szeregu następujących po sobie problemów</li>
-<li>po nauczeniu problemu $X_k$, pojawia się kolejny $X_{k+1}$</li>
-<li>algorytm uczący <strong>nie ma już dostępu</strong> do danych $X_k$</li>
-<li>wprowadzenie niezmienników odpowiada temu, by predykcje dla przykładów z $X_k, X_{k-1},\dots$ pozostały bez zmian</li>
-<li>to jest bardzo trudne zadanie, ale aktualne</li>
-</ul>
-</li>
-<li>wiele potrzebnych augmentacji dla standardowych problemów jest dostepnych w bibliotekach, np. <code>torchvision.transforms</code></li>
-</ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=63d59e06-54d7-45e4-922b-983815669575">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Early-stopping">Early stopping<a class="anchor-link" href="#Early-stopping">¶</a></h2><ul>
-<li>podobnie jak w przypadku zależności błędu uczącego i generalizacji w zależności od złożoności modelu, jest on zależny od długości uczenia (liczby epok)<ul>
-<li>model wraz z liczbą epok staje się coraz bardziej 'dopasowany', a stąd i złożony</li>
-<li>pewnym rozwiązaniem może być wcześniejsze zatrzymanie uczenia</li>
-<li>wymaga wielu prób i zapamiętywania modeli</li>
+<h2 id="LeNet">LeNet<a class="anchor-link" href="#LeNet">¶</a></h2><img alt="No description has been provided for this image" src="ml_figures/lenet5.png" style="float: right;" width="500"/>
+<ul>
+<li><p>projekt Yanna LeCunn (wtedy Bell Labs, obecnie profesor na NYU, szef naukowy na Meta (nie jestem pewien czy wciąż) jeden z guru AI i sieci neuronowych w szczególności) i Leona Bottou, lata 1990...</p>
+</li>
+<li><p>oryginalnie dla obrazów MNIST, $28\times28$, razem 784 pikseli</p>
+<ul>
+<li>oryginalne obrazy miały wymiar 32 na 32, ale zostały obcięte dla oszczędności</li>
+<li>LeNet został zastosowany do maszyn ATM - niektóre wciąż używają</li>
+<li>poniżej 1% błędu</li>
+</ul>
+</li>
+<li><p>bloki konwolucyjne Cn z sigmoidalną aktywacją</p>
+<ul>
+<li>C1 ma 6 kanałów wyjściowych, C3 ma 16</li>
+<li>konwolucje 5 na 5</li>
+<li>pierwsza warstwa ma w rzeczywistości padding=2, odpowiadający usuniętym pikselom</li>
+<li>druga warstwa konwolucyjna nie dodaje padding</li>
+</ul>
+</li>
+<li><p>bloki average-pooling S</p>
+<ul>
+<li>każdy pooling o wymiarach 2 na 2, ze stride=2</li>
+</ul>
+</li>
+<li><p>na końcu warstwy liniowe z sigmoidalną aktywacją o wielkościach 120, 84, i 10 (tyle ile cyfr)</p>
+<ul>
+<li>oryginalnie gausowska funkcja aktywacji</li>
+</ul>
+</li>
+<li><p>model osiąga błąd na zbiorach uczących, walidacyjnych i testowych poniżej 1% już po kilkunastu epokach</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1fba4f0d-adb4-4fd1-ab26-821ef2934fcd">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="AlexNet-%5BKrizhevsky,-Sutskever,-Hinton,-ImageNet-Classification-with-deep-convolutional-neural-networks%5D">AlexNet <a href="https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf">[Krizhevsky, Sutskever, Hinton, ImageNet Classification with deep convolutional neural networks]</a><a class="anchor-link" href="#AlexNet-%5BKrizhevsky,-Sutskever,-Hinton,-ImageNet-Classification-with-deep-convolutional-neural-networks%5D">¶</a></h2><img alt="No description has been provided for this image" src="ml_figures/alexnet.png" style="float: right;" width="560"/>
+<ul>
+<li>przez długi czas sieci neuronowe nie były w stanie przetwarzać dużych zbiorów i uczyć się niskopoziomowych cech</li>
+<li>zwykle cechy były tworzone "ręcznie" by używać linowych klasyfikatorów</li>
+<li>dopiero AlexNet [Krizhevsky et al., 2012] był pierwszym modelem, w którym powstało <strong>uczenie reprezentacji</strong> (representation learning)<ul>
+<li>zamiast <em>projektować</em> cechy, model <strong>uczył</strong> się istotnych dla problemu <strong>filtrów</strong></li>
+<li>okazało się, że dla zadań rozpoznawania obrazów są one bardzo zbieżne z filtrami Gabora<ul>
+<li>również znalezionymi w układzie wzrokowym</li>
 </ul>
 </li>
 </ul>
+</li>
+</ul>
+<p><img alt="No description has been provided for this image" src="ml_figures/alexnet-features.png" style="float: left;" width="480"/>[Krizhevsky et al]</p>
+<ul>
+<li>dane <a href="https://www.image-net.org">ImageNet 2009</a>: milion obrazów - 1000 obrazów z każdej z 1000 klas zorganizowanych hierarchicznie WordNet<ul>
+<li>obrazy 224 na 224</li>
+<li>konkurs ILSVRC</li>
+</ul>
+</li>
+<li>szczęśliwie pojawiły się rozwiązania GPU dla gier komputerowych, później uogólnione<ul>
+<li>GPU są zwykle znacznie bardziej efektywne energetycznie</li>
+<li>wykonują bardzo wiele prostych operacji równolegle</li>
+<li>to jest spójne z koncepcją grafu obliczeń</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=966bf48c-c74e-4c67-a1fd-acd58c166c7c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Architektura-AlexNet">Architektura AlexNet<a class="anchor-link" href="#Architektura-AlexNet">¶</a></h3><ul>
+<li>koncepcją było wykorzystanie GPU i zoptymalizowanie architektury dla dwóch jednostek<ul>
+<li>konwolucje 11 na 11 w pierwszej warstwie</li>
+<li>w następnej konwolucje 5 na 5, a potem 3 na 3</li>
+<li>wykorzystuje max-pooling</li>
+<li>znacznie więcej kanałów niż LeNet (obrazy są zresztą kolorowe)</li>
+<li>na końcu dwie warstwy FF z 4096 neuronami każda co wymaga około 1GB parametrów</li>
+<li>ze względu na ograniczone zasoby użytych GPU, model został oryginalnie podzielony na dwie części<ul>
+<li>każdy procesor obsługiwał jedynie połowę parametrów</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>AlexNet wykorzystał aktywację ReLU<ul>
+<li>znacznie prostsze obliczenia</li>
+<li>zapobiega przed problemem zanikającego gradientu przy wysyconych wartościach sum</li>
+</ul>
+</li>
+<li>uczenie<ul>
+<li>LeNet wykorzystywał jedynie weight decay</li>
+<li>w AlexNet autorzy dodali bardzo wiele <strong>augmentacji</strong> danych<ul>
+<li>odwracanie, translacja, i obcinanie obrazu</li>
+<li>modyfikacje kolorów</li>
+<li>znacznie większy zbiór danych zabezpieczał przed overfittingiem</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>AlexNet wygrywając ILSVRC-2012 z dużą przewagą okazał się przełomowym rozwiązaniem przekraczając Rubikon od sieci płytkich do głębokich<ul>
+<li>z jednej strony poprawienie LeNet</li>
+<li>skok dzięki ReLU</li>
+<li>ostatnie dwie warstwy miały $6400\times4096+4096\times4096$ parametrów!</li>
+<li>wciąż jednak długo nie było powszechnie dostępnych narzędzi programistycznych</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c1440c60-f77b-49e1-9b95-79b403f0a029">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="VGG-net-(Visual-Geometry-Group,-Oxford)-%5BKaren-Simonyan,-Andrew-Zisserman-2014%5D">VGG net (Visual Geometry Group, Oxford) <a href="https://arxiv.org/abs/1409.1556">[Karen Simonyan, Andrew Zisserman 2014]</a><a class="anchor-link" href="#VGG-net-(Visual-Geometry-Group,-Oxford)-%5BKaren-Simonyan,-Andrew-Zisserman-2014%5D">¶</a></h2><img alt="No description has been provided for this image" src="ml_figures/vggnet.png" style="float: right;" width="320"/>
+<ul>
+<li><p>podczas gdy AlexNet był architekturą zaprojektowaną od początku do końca, VGG był propozycją <strong>modułową</strong> z <strong>powtarzalnych</strong> bloków</p>
+<ul>
+<li>warstwy konwolucyjnej z paddingiem dla utrzymania rozdzielczości</li>
+<li>nieliniowości typu ReLU</li>
+<li>pooling typu max-pooling dla redukcji rozdzielczości<ul>
+<li>w CNN rozdzielczość spada szybko dając ścisłe ograniczenie na liczbę warstw rzędu $\log_2 d$ gdzie $d$ jest wymiarem wejścia (dla ImageNet to daje 8 warstw konwolucyjnych)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>w VGG autorzy zaproponowali <strong>głębsze</strong> modele raczej niż szersze przez wiele kolejnych mniejszych konwolucji</p>
+<ul>
+<li>przykładowo <strong>trzy</strong> warstwy konwolucji $3\times3$<ul>
+<li>dodanie paddingu 1 w każdym kierunku <strong>nie</strong> zmniejsza wymiaru</li>
+<li>to daje $3\cdot9\cdot{}c^2$ parametrów</li>
+</ul>
+</li>
+<li>podczas gdy konwolucja $5\times5$ (jak w AlexNet)<ul>
+<li>dla nie zmniejszania wymiaru konieczny padding 2</li>
+<li>parametrów $25\times{}c^2$, a więc bardzo podobna liczba</li>
+</ul>
+</li>
+<li>konwolucję $7\times7$ mamy $7\times7$ można zastąpić <strong>pięcioma</strong> konwolucjami $3\times3$ o liczbie $5\times3\times3$ parametrów
+*też padding 1 by nie zmniejszać wymiarów</li>
+<li>w każdym <strong>bloku</strong> VGG <strong>dwie</strong> warstwy konwolucyjne<ul>
+<li>zwykle znacznie zwiększają liczbę kanałów</li>
+<li>a następnie warstwa max-pool redukująca wymiar</li>
+<li>blokowa konstrukcja pozwala na budowę modelu o (prawie) dowolnej głębokości</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>VGG-16 ma trochę ponad 138 milionów parametrów, AlexNet ponad 62 miliony</p>
+<p>| warstwa | in | out | layer | stride | kernel | param |
+| ---: | :--- | :--- | :--- | ---: | :--- | ---: |
+| 1    | 224 x 224 x 3 | 224 x 224 x 64 | conv |  1 | 3 x 3 | 1,792 |
+| 2    | 224 x 224 x 64 | 224 x 224 x 64 | conv | 1 | 3 x 3 | 36,928 |
+|      | 224 x 224 x 64 | 112 x 112 x 64 | max-pool | 2 | 2 x 2 | |
+| 3    | 112 x 112 x 64 | 112 x 112 x 128 | conv | 1 | 3 x 3 | 73,856 |
+| 4    | 112 x 112 x 128 | 112 x 112 x 128 | conv | 1 | 3 x 3 | 147,584 |
+|      | 112 x 112 x 128 | 56 x 56 x 128 | max-pool | 2 | 2 x 2 |  |
+| 5    | 56 x 56 x 128 | 56 x 56 x 256 | conv | 1 | 3 x 3 | 295,168 |
+| 6    | 56 x 56 x 256 | 56 x 56 x 256 | conv | 1 | 3 x 3 | 590,080 |
+| 7    | 56 x 56 x 256 | 56 x 56 x 256 | conv | 1 | 3 x 3 | 590,080 |
+|      | 56 x 56 x 256 | 28 x 28 x 256 | max-pool | 2 | 2 x 2 | |
+| 8    | 28 x 28 x 256 | 28 x 28 x 512 | conv | 1 | 3 x 3 | 1,180,160 |
+| 9    | 28 x 28 x 512 | 28 x 28 x 512 | conv | 1 | 3 x 3 | 2,359,808 |
+| 10   | 28 x 28 x 512 | 28 x 28 x 512 | conv | 1 | 3 x 3 | 2,359,808 |
+|      | 28 x 28 x 512 | 14 x 14 x 512 | max-pool | 2 | 2 x 2 | |
+| 11   | 14 x 14 x 512 | 14 x 14 x 512 | conv | 1 | 3 x 3 | 2,359,808 |
+| 12   | 14 x 14 x 512 | 14 x 14 x 512 | conv | 1 | 3 x 3 | 2,359,808 |
+| 13   | 14 x 14 x 512 | 14 x 14 x 512 | conv | 1 | 3 x 3 | 2,359,808 |
+|      | 14 x 14 x 512 | 7 x 7 x 512  | max-pool | 2 | 2 x 2 | |
+| 14   | 1 x 1 x 25088 | 1 x 1 x 4096 | feed-forward | | 1 x 1 | 102,764,544 |
+| 15   | 1 x 1 x 4096 | 1 x 1 x 4096 | feed-forward | | 1 x 1 | 16,781,312 |
+| 16   | 1 x 1 x 4096 | 1 x 1 x 1000 | feed-forward | | 1 x 1 | 4,097,000 |
+|      |              |              |              | | razem | 138,423,208 |</p>
+</li>
+<li><p>jest wiele predefiniowanych architektur VGGNet umożliwiających pewne zrównoważenie między jakością a złożonością</p>
+</li>
+<li><p>możliwe, że sieci płytsze, ale szersze pozwalają na podobną jakość przy szybszym uczeniu</p>
+</li>
+<li><p>VGGNet wciąż ma warstwy feed-forward na końcu, które mają olbrzymią liczbę parametrów</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=712c2adf-ef6a-402d-ab23-01b223bb60ab">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Czy-mo%C5%BCliwa-jest-optymalizacja-tych-architektur?">Czy możliwa jest optymalizacja tych architektur?<a class="anchor-link" href="#Czy-mo%C5%BCliwa-jest-optymalizacja-tych-architektur?">¶</a></h2><ul>
+<li>wszystkie mają warstwy feed-forward z olbrzymią liczbą parametrów<ul>
+<li>taka warstwa jest olbrzymią macierzą trudną do przetwarzania na mniejszych urządzeniach</li>
+</ul>
+</li>
+<li>propozycja uproszczenia<ul>
+<li>użycie konwolucji $1\times1$ dla dodania lokalnych nieliniowości</li>
+<li>dodanie average-pooling na samym końcu</li>
+</ul>
+</li>
+<li>architektura <strong>network-in-network</strong> <a href="https://arxiv.org/pdf/1312.4400.pdf">[Lin, Chen, Yan, <em>Network in network</em>, 2013]</a> wykorzystuje blok zastępujący blok w VGG<ul>
+<li>konwolucja $n\times{}n$</li>
+<li>konwolucja $1\times1$</li>
+<li>konwolucja $1\times1$</li>
+</ul>
+</li>
+<li>w kolejnych blokach <strong>NiN</strong> konwolucje<ul>
+<li>$11\times11$ ze stride 4, 96 kanałów</li>
+<li>$5\times5$ z paddingiem 2, 256 kanałów</li>
+<li>$3\times3$ z paddingiem 1, 384 kanały</li>
+<li>$3\times3$ z paddingiem 1, 10 kanałami (tyle ile klas wyjściowych)</li>
+<li><strong>bez warstw feed-forward</strong> na końcu</li>
+<li>na końcu każdy kanał jest uśredniony przez <strong>average pooling</strong><ul>
+<li>aby ta operacja miała sens, konieczne są konwolucje $1\times1$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>konwolucje $1\times1$<ul>
+<li>operują na pojedynczych pikselach</li>
+<li>można traktować jako wielowymiarowe warstwy feed-forward uczone na pojedynczych pikselach obrazu</li>
+</ul>
+</li>
+<li>ta budowa znacznie zmniejsza liczbę uczonych parametrów<ul>
+<li>ten model trochę idzie w szerokość poprzez konwolucje na początku</li>
+<li>jednocześnie w głębokość przez konwolucje $1\times1$</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=26018ccb-8793-4c91-96d0-e11ee1db83b3">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Wszystko-razem:-r%C3%B3%C5%BCne-wymiary-konwolucji,-konwolucje-$1%5Ctimes1$,-bloki,-ale-te%C5%BC-rozwarstwienia-%5BSzegedy,-Going-deeper-with-convolutions,-2014%5D">Wszystko razem: różne wymiary konwolucji, konwolucje $1\times1$, bloki, ale też rozwarstwienia <a href="https://arxiv.org/pdf/1409.4842.pdf">[Szegedy, Going deeper with convolutions, 2014]</a><a class="anchor-link" href="#Wszystko-razem:-r%C3%B3%C5%BCne-wymiary-konwolucji,-konwolucje-$1%5Ctimes1$,-bloki,-ale-te%C5%BC-rozwarstwienia-%5BSzegedy,-Going-deeper-with-convolutions,-2014%5D">¶</a></h2><img alt="No description has been provided for this image" src="ml_figures/inception-block.png" style="float: right;" width="550"/>
+<ul>
+<li><p>konwolucje przetwarzają obraz na różnych poziomach łącząc wyniki</p>
+<ul>
+<li>zwykle badacze szukają optymalnej konwolucji dla problemu, albo ustalają stałą, np. VGG<ul>
+<li>każdy problem ma inne wymagania</li>
+<li>rozpoznawanie jest zależne od tego, jaką frakcję całego wejścia (obrazu) zajmuje istotna informacja</li>
+<li>zbyt głębokie sieci mają skłonność do zbytniego dopasowania (overfitting)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>konwolucje $1\times1$ pozwalają na zwiększenie wymiarowości dodając nieliniowości stosunkowo niskim kosztem
+<img alt="No description has been provided for this image" src="ml_figures/inception-block-concatenate.png" style="float: left;" width="370"/></p>
+<ul>
+<li>GoogLeNet po prostu konkatenuje wyniki!</li>
+<li>oryginalne rozwiązanie dodawało dodatkowe funkcje pośrednie dla zwiększenia stabilności uczenia w złożonej architekturze</li>
+<li>nowe algorytmy uczące, wraz z normalizacją (BatchNorm) pozwoliły na uniknięcie</li>
+<li>konwolucje używają odpowiednich paddingów dla utrzymania wymiarów by móc konkatenować wyniki</li>
+</ul>
+</li>
+</ul>
+<hr/>
+<h3 id="Inception-v1">Inception v1<a class="anchor-link" href="#Inception-v1">¶</a></h3><img alt="No description has been provided for this image" src="ml_figures/inception-v1.png" style="float: right;" width="650"/>
+<ul>
+<li>model jest głęboki (22 poziomy konwolucji) powodując zanikanie gradientów w środkowej części<ul>
+<li>dodatkowe dwa poziomy klasyfikacyjne - softmax do pośrednich wyników - w środkowej części</li>
+<li>całkowita wartość loss jako suma ważona (zwykle z wagą $\sim0.3$ dla każdego wyjścia)</li>
+</ul>
+</li>
+</ul>
+<hr/>
+<h3 id="Inception-v2">Inception v2<a class="anchor-link" href="#Inception-v2">¶</a></h3><img alt="No description has been provided for this image" src="ml_figures/inception-v2-block.png" style="float: left;" width="250"/>
+<ul>
+<li>konwolucje o większych wymiarach za szybko zmniejszają wymiar, powodując wąskie gardło informacyjne (ang. <em>information bottleneck</em>), jednocześnie spowalniając<ul>
+<li>faktoryzacja konwolucji $5\times5$ na dwie konwolucje $3\times3$<ul>
+<li>efektywniejsze — prawie 3 razy szybsze obliczenia</li>
+</ul>
+</li>
+<li>zamiana konwolucji $n\times{}n$ na sekwencję konwolucji $n\times1$ oraz $1\times{}n$, co dla konwolucji $3\times3$ okazuje się o jedną trzecią szybsze!</li>
+<li>także banki filtrów: zamiast sekwencji $3\times1$ oraz $1\times3$ zrobić <strong>równolegle</strong> $n\times1$ oraz $1\times{}n$ a następnie konkatenować wyniki</li>
+</ul>
+</li>
+</ul>
+<hr/>
+<h3 id="Inception-v3">Inception v3<a class="anchor-link" href="#Inception-v3">¶</a></h3><ul>
+<li>dodatkowe klasyfikatory pośrodku pnia Inception w niewiele dają<ul>
+<li>uczenie poprawia się dopiero gdy osiągana klasyfikacja jest prawie pewna (saturacja)<ul>
+<li>konieczna regularyzacja pośrednich klasyfikatorów</li>
+</ul>
+</li>
+<li>modyfikacja Inception v2 przez<ul>
+<li>zmianę uczenia na RMSProp</li>
+<li>faktoryzację konwolucji $7\times7$</li>
+<li>dodanie BatchNorm w pośrednich klasyfikatorach</li>
+<li>regularyzacja przez wygładzanie etykiet <a href="https://arxiv.org/pdf/1906.02629.pdf">[Muller, Kornblith, Hinton, When does label smoothing help?, 2019]</a><ul>
+<li>jeśli etykiety są nieprawidłowe, to maksymalizacja $p(y\mid x)$ może być szkodliwa</li>
+<li>założenie, że dostępna etykieta jest prawdziwa z prawdopodobieństwem $1-\epsilon$</li>
+<li>zamiana etykiet $0, 1$ na $\dfrac{\epsilon}{k-1}, 1-\epsilon$ dla wektora wyjściowego one-hot o $k$ składnikach<ul>
+<li>po modyfikacji wciąż sumuje się do 1</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr/>
+<h3 id="Inception-v4">Inception v4<a class="anchor-link" href="#Inception-v4">¶</a></h3><img alt="No description has been provided for this image" src="ml_figures/inception-v4.png" style="float: right;" width="250"/>
+<ul>
+<li>architektura jest wciąż zbyt skomplikowana - zunifikować bloki<ul>
+<li>wersja 4 wprowadza 3 typy bloków A, B, i C</li>
+<li>bloki są zaimportowane z poprzednich wersji</li>
+</ul>
+</li>
+<li>zmodyfikować początkowy korzeń drzewa (stem)<ul>
+<li>początkowe przetwarzanie w korzeniu okazywało się bardzo istotne we wszystkich wersjach</li>
+</ul>
+</li>
+</ul>
+<img alt="No description has been provided for this image" src="ml_figures/inception-v4-block.png" style="float: right;" width="700"/>
+<ul>
+<li>dodatkowo wprowadzone bloki <strong>redukcji</strong><ul>
+<li>pozwalają na zmianę wymiarów explicite
+<img alt="No description has been provided for this image" src="ml_figures/inception-v4-reduction-block.png" style="float: right;" width="400"/></li>
+</ul>
+</li>
+</ul>
+<h3 id="Liczba-uczonych-parametr%C3%B3w">Liczba uczonych parametrów<a class="anchor-link" href="#Liczba-uczonych-parametr%C3%B3w">¶</a></h3><ul>
+<li>Inception ma znacznie mniejszą liczbę parametrów do uczenia</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9631d045-2742-4004-84a2-ab2c03fc61b2">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="Por%C3%B3wnanie-wynik%C3%B3w">Porównanie wyników<a class="anchor-link" href="#Por%C3%B3wnanie-wynik%C3%B3w">¶</a></h2><ul>
+<li>dla porównanie musimy wziąć pod uwagę liczbę parametrów, jak długo model trzeba liczyć, oraz skuteczność<ul>
+<li>Top-1 to frakcja przykładów, które model poprawnie sklasyfikował</li>
+<li>Top-5 to frakcja przykładów, gdy prawdziwa klasa była wskazana jako jedna z pierwszych pięciu najbardziej prawdopodobnych
+<img alt="No description has been provided for this image" src="ml_figures/imagenet-comparison.png" style="float: center;" width="750"/></li>
+</ul>
+</li>
+</ul>
+<h3 id="Por%C3%B3wnanie-wszelkich-modeli-dla-ImageNet"><a href="https://paperswithcode.com/sota/image-classification-on-imagenet">Porównanie wszelkich modeli dla ImageNet</a><a class="anchor-link" href="#Por%C3%B3wnanie-wszelkich-modeli-dla-ImageNet">¶</a></h3>
 </div>
 </div>
 </div>

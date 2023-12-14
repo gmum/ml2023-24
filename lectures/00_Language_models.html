@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>0_2023-24_wyklad</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>00_Language_models</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7476,200 +7476,99 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f93a77a7-750e-4f4d-9189-d8ecce34ff5f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1e337933-41d7-49fa-aa42-69e5ca8fc39c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Metody-uczenia-maszynowego-MUM-2023-24">Metody uczenia maszynowego MUM 2023-24<a class="anchor-link" href="#Metody-uczenia-maszynowego-MUM-2023-24">¶</a></h1>
+<h1 id="MUM-2023-24-Modele-j%C4%99zykowe-(bardzo-kr%C3%B3tki-wst%C4%99p)">MUM 2023-24 Modele językowe (bardzo krótki wstęp)<a class="anchor-link" href="#MUM-2023-24-Modele-j%C4%99zykowe-(bardzo-kr%C3%B3tki-wst%C4%99p)">¶</a></h1>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bde0f1db-6872-4c0d-94d9-0c15fb8f89f9">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=7809a4e4-1ab3-4ed6-a3f3-5a0efc0f10c7">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Sylabus-i-prerekwizyty">Sylabus i prerekwizyty<a class="anchor-link" href="#Sylabus-i-prerekwizyty">¶</a></h2><ul>
-<li>Wykład obejmuje problemy uczenia sieci neuronowych, w szczególności tzw. uczenia głębokiego.</li>
-</ul>
-<hr/>
-<h3 id="Prerekwizyty:">Prerekwizyty:<a class="anchor-link" href="#Prerekwizyty:">¶</a></h3><ol>
-<li>znajomość klasycznych metod uczenia maszynowego, przedstawianych na wykładzie prof. Spurka (zagadnienie uczenia, regresja liniowa, metody PCA, drzewa decyzyjne, lasy drzew, metody ensemblowe, etc.),</li>
-<li>podstawowa wiedza z metod algebry, analizy, statystyki (częściowo będzie wspomniane).</li>
-</ol>
-<hr/>
-<h3 id="Plan">Plan<a class="anchor-link" href="#Plan">¶</a></h3><ol>
-<li>Wstęp i pewne założenia matematyczne<ul>
-<li>będziemy wracać do tego</li>
+<h2 id="tokeny">tokeny<a class="anchor-link" href="#tokeny">¶</a></h2><ul>
+<li>dane tekstowe jako słowa, litery, fragmenty słów</li>
+<li>jak wczytać dane takstowe?<ul>
+<li>wczytanie surowego tekstu</li>
+<li>tokenizacja zależna od modelu - słowa, litery, etc.</li>
+<li>często usuwane są końcówki - zostają jądra - stems<ul>
+<li>np. Porter's stemmer dla angielskiego, dla polskiego trudniejszy</li>
 </ul>
 </li>
-<li>Problem uczenia maszynowego<ul>
-<li>problemy w uczeniu, zagadnienie generalizacji,</li>
-<li>jak wspomagać dobrą generalizację</li>
-<li>zadania wstępnego losowania wag oraz regularyzacji</li>
-<li>metody przeprowadzania doświadczeń</li>
-<li>statystyczne metody porównywania modeli</li>
+<li>słownik jako zestaw po-indeksowanych tokenów</li>
+<li>słownik udostępnia statystyki<ul>
+<li>częstotliwość słów jest zgodna z <strong>rozkładem prawa potęgowego</strong> zgodnie z <strong>prawem Zipfa</strong>, że częstotliwość  $n_i$ i-tego w rankingu częstotliwości słowa jest $n_i\propto\dfrac{1}{i^\alpha}$<ul>
+<li>stąd zwykle estymacja częstotliwości najrzadszych słów będzie przesadzona</li>
 </ul>
 </li>
-<li>Głębokie uczenie, podstawowe modele</li>
-<li>Modele sieci konwolucyjnych</li>
-<li>Grafowe modele</li>
-<li>Modele rekurencyjne</li>
-<li>Atencja i model transformera</li>
-<li>Uczenie generatywne</li>
-<li>Nowoczesne modele dyfuzyjne</li>
-</ol>
-<p>Niektóre zagadnienia mogą ulec lekkiemu przesunięciu, modyfikacji, a niektóre zagadnienia mogą być jeszcze dodane. Część może być jedynie wspomniana na wykładzie a omówiona głębiej na ćwiczeniach. Proszę się za bardzo nie przywiązywać.</p>
+<li>można się posługiwać bigramami lub trigramami<ul>
+<li>znaczna większość bigramów składa się ze słowa i tzw. stop-word</li>
+<li>bigramy i trigramy także spełniają prawo Zipfa, jednak z mniejszym współczynnikiem $\alpha$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f1649592-f9b2-498b-b653-dc3ee50bb80f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1037a11a-4f30-4a14-8f2a-165d8767ced2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Zasady-zaliczania">Zasady zaliczania<a class="anchor-link" href="#Zasady-zaliczania">¶</a></h2><ul>
-<li>obecność na wykładzie nie jest obowiązkowa, ale bardzo wskazana i mile widziana,</li>
-<li>ćwiczenia będą się odbywały z notebook-ami Jupyter</li>
-<li>językiem będzie Python, środowiskiem Pytorch<ul>
-<li>tu nie ma żadnej możliwości zmiany</li>
+<h2 id="reprezentacja-wej%C5%9Bcia-dla-modelu-j%C4%99zykowego">reprezentacja wejścia dla modelu językowego<a class="anchor-link" href="#reprezentacja-wej%C5%9Bcia-dla-modelu-j%C4%99zykowego">¶</a></h2><ul>
+<li>często reprezentacja jest one-hot, jednak dla słownika jest to niewykonalne (tzw. <strong>curse of dimensionality</strong>)<ul>
+<li>reprezentacja jako indeks w słowniku, np. pozycja w tabeli częstości? trochę bez sensu</li>
 </ul>
 </li>
-<li>na koniec roku będzie egzamin pisemny (test wielokrotnego wyboru, kilka pytań otwartych)<ul>
-<li>materiałem obowiązkowym do egzaminu jest suma materiałów wykładu i ćwiczeń</li>
+<li>możliwa reprezentacja jako <strong>rozproszony wektor cech</strong> <a href="https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf">[Bengio, Ducharme, Vincent, Jauvin, <em>A neural probabilistic language model</em>, 2003]</a><ul>
+<li>mapowanie indeksu $i\in{}V$ do m-wymiarowego wektora cech $C(i)\in\mathbb{R}^m$</li>
 </ul>
 </li>
-<li>skala ocen jest quasi-logarytmiczna [50, 64), [64, 76), [76, 86), [86, 94), [94, 100]<ul>
-<li>do końcowej oceny z przedmiotu będzie częściowo wliczana ocena z ćwiczeń</li>
-<li>piątka z ćwiczeń zwalnia z egzaminu</li>
+<li>"podobne" słowa powinny mieć podobne reprezentacje i więcej<ul>
+<li><em>Rzym</em>, <em>Paryż</em>, <em>Berlin</em>, <em>Ateny</em>, <em>Pekin</em>, <em>Praga</em> powinny mieć "podobne" reprezentacje jako miasta</li>
+<li>analogicznie "Włochy<em>, "Francja</em>, "Niemcy", "Grecja<em>, *Chiny</em>, <em>Czechy</em> powinny być niedaleko</li>
+<li>na dodatek wszystkie te miasta powinny być oddalone od odpowiadających państw podobnie, aby <em>Francja</em> - <em>Paryż</em> = <em>Czechy</em> - <em>Praga</em><ul>
+<li>to pozwoli nawet na znalezienie stolicy przez <em>Berlin</em> - <em>Niemcy</em> + <em>Polska</em>...</li>
 </ul>
 </li>
-<li>dodatkowe punkty można uzyskać za udział w jednym z projektów w grupie GMUM; ocenę będzie wyznaczał kierownik/kierowniczka danego projektu</li>
+<li>można znaleźć przez Word2Vec <a href="https://proceedings.neurips.cc/paper_files/paper/2013/file/9aa42b31882ec039965f3c4923ce901b-Paper.pdf">[Mikolov, Sutskever, Chen, Corrado, Dean, _Distributed representations of words and phrases and their compositionality*, 2013]</a><ul>
+<li>Google w 2015 otrzymał patent na metodę, chociaż w 2014 Mikolov przeniósł się z Googla do Facebooka 😏</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a09b1382-90a5-4043-a3a6-6df9b6a9acf8">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b32fea9f-679a-4f0e-945f-12d675968a00">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Matematyczne-podstawy">Matematyczne podstawy<a class="anchor-link" href="#Matematyczne-podstawy">¶</a></h2><ol>
-<li><a href="./stat_01_Rozklad_ciagly_dyskretny_mieszany.ipynb">Rozkłady ciągły, dyskretny i mieszany</a></li>
-<li><a href="./stat_02_Rozklad_laczny_brzegowy_warunkowy.ipynb">Rozkłady łączny, brzegowy, i warunkowy</a></li>
-<li><a href="./stat_03_Zmienne_niezalezne.ipynb">Zmienne niezależne</a></li>
-<li><a href="./stat_04_Twierdzenie_Bayesa.ipynb">Twierdzenie Bayesa</a></li>
-<li><a href="./stat_05_Wartosc_oczekiwana_Wariancja_Estymatory.ipynb">Wartość oczekiwana, wariancja, i estymatory</a></li>
-<li><a href="./stat_06_Analiza_i_Algebra.ipynb">Potrzebne pojęcia z analizy i algebry</a></li>
-<li><a href="./stat_07_Pochodna_funkcji_wielu_zmiennych.ipynb">Pochodna funkcji wielu zmiennych</a></li>
-</ol>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b19f0668-6444-486c-8766-cfc4820de15a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Wyk%C5%82ad-1">Wykład 1<a class="anchor-link" href="#Wyk%C5%82ad-1">¶</a></h2><ol>
-<li><a href="./01_Wstep.ipynb">Wstęp: jakie są zagadnienia uczenia maszynowego?</a></li>
-<li><a href="./13_Model_generatywny_vs_dyskryminatywny_Uczenie_MLE.ipynb">Modele dyskryminatywne a modele generatywne</a></li>
-<li><a href="./14_Uczenie_MLE.ipynb">Uczenie Maximum Likelihood Estimation MLE</a></li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ad-2">Wykład 2<a class="anchor-link" href="#Wyk%C5%82ad-2">¶</a></h2><ol start="4">
-<li><a href="./28_Sieci_neuronowe.ipynb">Sieci neuronowe</a></li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ad-3">Wykład 3<a class="anchor-link" href="#Wyk%C5%82ad-3">¶</a></h2><ol start="5">
-<li><a href="./17_Klasyfikacja.ipynb">Zadanie klasyfikacji</a><ul>
-<li><a href="20_Regresja_logistyczna_dwuklasowa.ipynb">Regresja logistyczna</a></li>
-<li><a href="21_Regresja_logistyczna_wieloklasowa.ipynb">Regresja logistyczna dla wielu klas</a></li>
+<h2 id="uczenie">uczenie<a class="anchor-link" href="#uczenie">¶</a></h2><ul>
+<li>uczenie $P(x_t\mid x_{t-1}, \dots,x_1)$ jest wbrew pozorom proste<ul>
+<li>model nauczony na wystarczającym korpusie łatwo przejdzie test na podobieństwo do jęzeka</li>
+<li>model uczony na "Also spracht Zarathustra" będzie przypominał Nietzschego w stylu</li>
+<li>to jednak tylko poprawnie gramatycznie wygenerowany tekst</li>
 </ul>
 </li>
-<li><a href="./18_Regresja.ipynb">Zadanie regresji</a><ul>
-<li><a href="19_Regresja_liniowa.ipynb">Regresja liniowa</a></li>
 </ul>
-</li>
-<li><a href="./28_Sieci_neuronowe.ipynb">Sieci neuronowe</a></li>
-<li><a href="./00_Funkcje_kosztu.ipynb">Niektóre funkcje kosztu sieci neuronowych</a></li>
-<li><a href="./12_Graf_obliczen.ipynb">Graf obliczeń</a></li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ad-4">Wykład 4<a class="anchor-link" href="#Wyk%C5%82ad-4">¶</a></h2><ol start="10">
-<li><a href="./29_Gradientowe_uczenie_sieci_neuronowych.ipynb">Gradientowe uczenie sieci neuronowych</a><ul>
-<li><a href="16_Najprostszy_model_generatywny_rozklad_ciagly.ipynb">Model generatywny z rozkładem ciągłym</a></li>
-<li><a href="15_Najprostszy_model_generatywny_rozklad_dyskretny.ipynb">Model generatywny z rozkładem dyskretnym</a></li>
-</ul>
-</li>
-<li><a href="./09_Optimizery.ipynb">Optymalizacja parametrów sieci — podstawowe optymalizatory gradientowe</a></li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ad-5">Wykład 5<a class="anchor-link" href="#Wyk%C5%82ad-5">¶</a></h2><ol start="12">
-<li><a href="./10_Optimizery_adaptacyjne.ipynb">Zaawansowana optymalizacja — optymalizatory adaptacyjne</a></li>
-<li><a href="./11_Optimizery_podsumowanie.ipynb">Optimizery — podsumowanie</a></li>
-<li><a href="./23_Overfitting.ipynb">Problemy generalizacji - overfitting</a><ul>
-<li><a href="./22_Funkcje_bazowe.ipynb">Funkcje bazowe</a></li>
-</ul>
-</li>
-<li><a href="./24_0_Regularyzacja.ipynb">Metody regularyzacji</a></li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ady-6">Wykłady 6<a class="anchor-link" href="#Wyk%C5%82ady-6">¶</a></h2><ol start="16">
-<li><a href="./24_1_Regularyzacja_plus.ipynb">Zanikanie i wybuchanie gradientów - inicjalizacja oraz więcej metod regularyzacji - dropout, batchnorm</a></li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ady-7,-8">Wykłady 7, 8<a class="anchor-link" href="#Wyk%C5%82ady-7,-8">¶</a></h2><ol start="18">
-<li><a href="./00_Convolutions.ipynb">Modele sieci konwolucyjnych</a><ul>
-<li><a href="./00_ResNet.ipynb">Modele typu ResNet</a></li>
-<li><a href="./00_U-Net.ipynb">Model U-Net</a></li>
-<li><a href="00_Squeeze_and_excitation.ipynb">Wykorzystanie dodatkowej wiedzy o kanałach</a></li>
-<li><a href="00_Select_convolutional_model.ipynb">Poszukiwanie optymalnego modelu CNN</a></li>
-</ul>
-</li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ad-11">Wykład 11<a class="anchor-link" href="#Wyk%C5%82ad-11">¶</a></h2><ol start="19">
-<li><a href="lectures/00_GNN.pdf">Modele grafowych sieci neuronowych GNN</a></li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ad-9,-10,-12">Wykład 9, 10, 12<a class="anchor-link" href="#Wyk%C5%82ad-9,-10,-12">¶</a></h2><ol start="21">
-<li><a href="00_Recurrent.ipynb">Modele sieci rekurencyjnych i rozszerzenie przez atencję</a><ul>
-<li><a href="00_auto_regressive.ipynb">Auto-regresyjne</a></li>
-<li><a href="00_Language_models.ipynb">Językowe (bardzo krótko)</a></li>
-<li><a href="00_RNN_architecture.ipynb">Architektura sieci RNN</a></li>
-<li><a href="./00_Atencja.ipynb">Atencja</a></li>
-<li><a href="00_Transformer.ipynb">Model Transformera</a></li>
-</ul>
-</li>
-</ol>
-<hr/>
-<h2 id="Wyk%C5%82ad-13">Wykład 13<a class="anchor-link" href="#Wyk%C5%82ad-13">¶</a></h2><ol start="22">
-<li><a href="00_Generative.ipynb">Modele generatywne</a><ul>
-<li><a href="00_Autoencoders.ipynb">Autoenkodery</a></li>
-<li><a href="00_Generative_autoencoder.ipynb">Generatywne autoenkodery</a></li>
-<li><a href="00_Gan.ipynb">Generatywne modele adwersarialne GAN</a></li>
-<li><a href="">Modele dyfuzyjne</a></li>
-</ul>
-</li>
-</ol>
-<!-- 19. [Postępowanie przy wyborze najlepszego modelu]()
-    * [Metryki dla oceny modelu](./38_Metryki.ipynb)
-    * [Ewaluacja modelu](./39_Model_evaluation.ipynb)
-    * [Wybór modelu](./40_Model_selection.ipynb)
-    * [Porównanie modeli](./41_Model_comparison.ipynb)
-    * [Wyszukanie najlepszego modelu konwolucyjnego](./00_Select_convolutional_model.ipynb)
- -->
 </div>
 </div>
 </div>

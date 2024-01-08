@@ -5,7 +5,7 @@ Materials for the 2022/23 edition of Machine Learning classes.
 Przed konsultacjami proszę o kontakt mailowy w celu zasygnalizowania obecności.
 - Igor Podolak: ?
 - Piotr Gaiński: piątki 14:00-15:00, pokój 1068
-- Artur Kasymow: ?
+- Artur Kasymov: wszystkie informacje na stronie kursu na Pegazie
 
 # Tematy notebooków
 (mogą ulec zmianie)
@@ -19,8 +19,8 @@ Przed konsultacjami proszę o kontakt mailowy w celu zasygnalizowania obecności
 8. Regularyzacja: inicjalizacja, dropout, batch_norm, layer_norm.
 9.  Implementacja Convolutional Neural Network.
 10. Implementacja Recurrent Neural Network.
-11. Implementacja Tranformera.
-12. Implementacja Graph Neural Network.
+11. Implementacja Graph Neural Network.
+12. Implementacja Tranformera.
 13. Implementacja autoenkodera.
 14. Implementacja Generative Adversarial Network.
 15. BONUS: ewaluacja modeli - testy statystyczne i sensowne porownanie.

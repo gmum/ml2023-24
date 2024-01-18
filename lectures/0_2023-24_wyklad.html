@@ -7331,11 +7331,12 @@ a.anchor-link {
     if (!diagrams.length) {
       return;
     }
-    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.0/mermaid.esm.min.mjs")).default;
+    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.esm.min.mjs")).default;
     const parser = new DOMParser();
 
     mermaid.initialize({
       maxTextSize: 100000,
+      maxEdges: 100000,
       startOnLoad: false,
       fontFamily: window
         .getComputedStyle(document.body)
@@ -7659,9 +7660,19 @@ a.anchor-link {
 <li><a href="00_Autoencoders.ipynb">Autoenkodery</a></li>
 <li><a href="00_Generative_autoencoder.ipynb">Generatywne autoenkodery</a></li>
 <li><a href="00_Gan.ipynb">Generatywne modele adwersarialne GAN</a></li>
-<li><a href="">Modele dyfuzyjne</a></li>
 </ul>
 </li>
+</ol>
+<hr/>
+<h2 id="Wyk%C5%82ad-14">Wykład 14<a class="anchor-link" href="#Wyk%C5%82ad-14">¶</a></h2><ol start="23">
+<li>Porównywanie modeli przy uczeniu<ul>
+<li><a href="00_Classifier_comparison.ipynb">Ocena wielu klasyfikatorów</a></li>
+</ul>
+</li>
+</ol>
+<hr/>
+<h2 id="Wyk%C5%82ad-15">Wykład 15<a class="anchor-link" href="#Wyk%C5%82ad-15">¶</a></h2><ol start="24">
+<li><a href="">Modele dyfuzyjne</a></li>
 </ol>
 <!-- 19. [Postępowanie przy wyborze najlepszego modelu]()
     * [Metryki dla oceny modelu](./38_Metryki.ipynb)
